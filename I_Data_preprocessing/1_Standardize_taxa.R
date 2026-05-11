@@ -1,5 +1,6 @@
 ### Project: Agrobiodiversity, GCCFP, WCFP Complementarity ###
-### Data cleaning and filtering for new WCFP plantlist data
+### Taxon standardization to WFO using Global Names Verifer tool 
+### GnVerifier
 ### Script by Sarah Gora
 ### Date created: 2026_02_23
 
