@@ -1,6 +1,6 @@
 ## GCCFP: Complementarity Analysis Repository Structure
 
-This repository contains code for the "Global Consortium for Food Plants: Complementarity Analysis" project. It is organized into folders reflecting the sequential stages of the analysis pipeline, as well as supporting folders for reusable code and experimental work using the World Checklist of Food Plants (WCFP) plant list.
+This repository contains code for the "Global Consortium for Food Plants: Complementarity Analysis" project. It is organized into folders reflecting the sequential stages of the analysis pipeline, as well as supporting folders for reusable code and experimental work using the World Checklist of Food Plants (WCFP) species list.
 
 ### Main Analysis Pipeline
 
