@@ -1,7 +1,7 @@
-########################## Global Food Plant Occurrence Complementarity Maps ##########################
-# Author: Sarah Gora
-# Date: 2025_09_09
-# Updated: 2026_02_26
+# ================================================================================
+# GCCFP Complementarity Project: Occurrence Density + Species Richness Maps with 
+#    Genebank and Botanic garden Points Workflow
+# ================================================================================
 # Description:
 #   - Generates overlays for 20km grid: occurrence and species richness heatmaps
 #   - Overlays: Botanic Garden, Genebank, and both, using buffered polygons (10km radius)
@@ -27,20 +27,19 @@ library(ggnewscale)
 # --- Parameters & Paths ---
 output_dir <- "C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Figures/FINAL_2026-03-20/Sp_richness_gb_bg_locations_maps"
 
+output_dir <- "C:/Users/sarah/OneDrive/Desktop/GCCFP_2026/testing"
 # ------------------------------------------------------------------------------
 # --- Data Loading ---
 # ------------------------------------------------------------------------------
 
-# occurrences: 5,489,253 rows
-# Note use: wcfp_name_match instead of genus_species
+# Occurrences: 5,489,253 rows
+# note: use wcfp_name_match field
 occurrences_data <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_occurrences_dataset_2026-03-13.csv')
 
 
+# ---Prep organizations dataset ----
 
-# botanic garden and genebank locations
-#org_geo_data <- read_excel("C:/Users/sarah/Downloads/all_org_geo_data.xlsx")
-
-# all org: 22,276
+# Botanic garden and genebank locations: 22,276 organizations
 org_geo_data <- read_excel("C:/Users/sarah/Downloads/all_institutions_locations_corrected_2026-03-09.xlsx")
 
 #trim whitespace
@@ -73,8 +72,9 @@ org_geo_data_invalid <- org_geo_data %>%
 
 
 
-
-
+#-------------------------------------------------------------------------------------
+# --- Map: Species Richness Heatmap with Jittered Botanic Garden & Genebank Points ---
+# ------------------------------------------------------------------------------------
 
 # --- Parameters ---
 crs_equalarea <- 8857  # Equal Earth Projection
@@ -107,124 +107,6 @@ genebanks_proj <- st_transform(
   org_geo_sf_both %>% filter(organization_type == "Genebank"),
   crs = crs_equalarea
 )
-
-
-
-
-
-# --- Map: Species Richness Heatmap with Jittered Botanic Garden & Genebank Points ---
-
-# Colors for institutions
-inst_colors <- c("Botanic garden" = "purple", "Genebank" = "orange")
-
-# Build a dataframe of both institution types, with color labels
-institutions_points <- rbind(
-  botanic_gardens_proj  %>% mutate(inst_type = "Botanic garden"),
-  genebanks_proj        %>% mutate(inst_type = "Genebank")
-)
-
-# Main plot
-p <- ggplot() +
-  geom_sf(data = world_plot, fill = "grey98", color = NA) +
-  geom_sf(data = grid_richness_land_proj, aes(fill = richness), color = NA) +
-  scale_fill_gradient(
-    low      = "lightgreen",
-    high     = "darkgreen",
-    trans    = "log10",
-    na.value = "white",
-    name     = "Number of species",
-    labels   = label_comma_over_10000
-  ) +
-  geom_sf(data = world_plot, fill = NA, color = "grey80", linewidth = 0.2) +
-  new_scale("color") +
-  geom_sf(
-    data        = institutions_points, 
-    aes(color   = inst_type), 
-    size        = 0.8,      # TESTING
-    alpha       = 0.8, 
-    show.legend = TRUE,
-    stroke      = 0
-  ) +
-  scale_color_manual(
-    name   = "Institution type",
-    values = inst_colors
-  ) +
-  labs(title = NULL) +
-  theme_minimal() +
-  theme(
-    panel.background = element_rect(fill = "white", color = NA)
-  ) +
-  add_graticule_breaks(lon_breaks = lon_breaks, lat_breaks = lat_breaks) +
-  manual_graticule_theme() +
-  manual_graticule_coord() +
-  add_manual_graticule_labels(lon_breaks = lon_breaks, lat_breaks = lat_breaks)
-
-# --- Save the plot (optional) ---
-save_map_both(p, "FigS4.Speciesrichness-20kmgrid_botanicgarden-genebank-locations_map", output_dir)
-
-
-
-
-# --- Crop white space from saved PNGs and PDFs ---
-# Run this after Script has saved all maps
-
-# --- Libraries ---
-library(magick)   # install.packages("magick")
-
-# --- Parameters ---
-output_dir <- "C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Figures/FINAL_2026-03-20/Sp_richness_gb_bg_locations_maps"
-
-# Fuzz: how aggressively to trim near-white pixels (0-100%)
-fuzz <- 2
-
-# Border: white padding (in pixels) added back after trimming
-# Increase for more breathing room around the map
-border_px <- 20
-
-# ------------------------------------------------------------------------------
-# PNG cropping
-# ------------------------------------------------------------------------------
-png_files <- list.files(output_dir, pattern = "\\.png$", full.names = TRUE)
-
-cat("--- Cropping PNGs ---\n")
-for (f in png_files) {
-  img         <- image_read(f)
-  img_trimmed <- image_trim(img, fuzz = fuzz)
-  img_padded  <- image_border(img_trimmed, color = "white",
-                              geometry = paste0(border_px, "x", border_px))
-  image_write(img_padded, path = f)
-  info <- image_info(img_padded)
-  cat(sprintf("Cropped: %s  [%d x %d px]\n", basename(f), info$width, info$height))
-}
-
-# ------------------------------------------------------------------------------
-# PDF cropping
-# ------------------------------------------------------------------------------
-pdf_files <- list.files(output_dir, pattern = "\\.pdf$", full.names = TRUE)
-
-cat("\n--- Cropping PDFs ---\n")
-for (f in pdf_files) {
-  img         <- image_read_pdf(f, density = 300)
-  img_trimmed <- image_trim(img, fuzz = fuzz)
-  img_padded  <- image_border(img_trimmed, color = "white",
-                              geometry = paste0(border_px, "x", border_px))
-  image_write(img_padded, path = f, format = "pdf")
-  cat(sprintf("Cropped: %s\n", basename(f)))
-}
-
-cat("\nDone. All files cropped in place.\n")
-
-
-
-
-
-
-
-
-
-
-
-
 
 # ------------------------------------------------------------------------------
 # --- Spatial Data Preparation ---
@@ -395,92 +277,9 @@ add_manual_graticule_labels <- function(
   )
 }
 
-
-# UPDATED SAVE_MAP_BOTH
-save_map_both <- function(p, filename, output_dir,
-                          width = 14, height = 7, dpi = 600,
-                          fill_legend_position = c(0.18, 0.40)) {
-  if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
-  
-  # Bottom legend: institution type only
-  p_for_color_legend <- p +
-    guides(
-      fill   = "none",
-      colour = guide_legend(
-        direction      = "horizontal",
-        title.position = "left",
-        title.hjust    = 0.5,
-        label.position = "right",
-        override.aes   = list(shape = 16, size = 3, alpha = 1)
-      )
-    ) +
-    theme(
-      legend.position       = "bottom",
-      legend.box            = "horizontal",
-      legend.background     = element_rect(fill = "transparent", color = NA),
-      legend.box.background = element_rect(fill = "transparent", color = NA),
-      legend.margin         = margin(6, 6, 6, 6)
-    )
-  color_legend <- cowplot::get_legend(p_for_color_legend)
-  
-  # Main plot: heatmap fill legend inset only
-  p_main <- p +
-    guides(
-      colour = "none",
-      fill   = guide_colorbar(
-        direction      = "vertical",
-        title.position = "top",
-        barheight      = unit(38, "mm"),
-        barwidth       = unit(6,  "mm")
-      )
-    ) +
-    theme(
-      legend.position       = fill_legend_position,
-      legend.justification  = c(0.5, 0.5),
-      legend.background     = element_rect(fill = "transparent", color = NA),
-      legend.box.background = element_rect(fill = "transparent", color = NA),
-      legend.margin         = margin(6, 6, 6, 6)
-    )
-  
-  combined <- cowplot::plot_grid(
-    p_main, color_legend,
-    ncol        = 1,
-    rel_heights = c(1, 0.11),
-    align       = "v"
-  ) 
-  # Save high-resolution PNG
-  png_path <- file.path(output_dir, paste0(filename, ".png"))
-  ggsave(
-    filename = png_path,
-    plot     = combined,
-    width    = width,
-    height   = height,
-    dpi      = dpi,
-    bg       = "white")
-  cat(sprintf("Saved: %s.png\n", filename))
-  
-  # Save PDF (vector, cairo_pdf for font/transparency support)
-  pdf_path <- file.path(output_dir, paste0(filename, ".pdf"))
-  ggsave(
-    filename = pdf_path,
-    plot     = combined,
-    width    = width,
-    height   = height,
-    device   = cairo_pdf,
-    bg       = "white")
-  cat(sprintf("Saved: %s.pdf\n", filename))
-}
-
-
-
-
-
-
-
-
-
-
-
+# set lat lon breaks for map
+lon_breaks <- seq(-180, 180, by = 60)
+lat_breaks <- seq(-60,   80, by = 20)
 
 
 
@@ -502,17 +301,11 @@ map_definitions <- list(
   )
 )
 
-lon_breaks <- seq(-180, 180, by = 60)
-lat_breaks <- seq(-60,   80, by = 20)
-
-
-
 # ------------------------------------------------------------------------------
 # --- Map Generation Loop ---
 # ------------------------------------------------------------------------------
 
-
-# UPDATED
+# Generate maps 
 for (map_def in map_definitions) {
   for (overlay in map_def$overlays) {
     
@@ -597,3 +390,58 @@ for (map_def in map_definitions) {
 }
 
 
+# --- Save map or maps ---
+save_map_both(p, "FigS4.Speciesrichness-20kmgrid_botanicgarden-genebank-locations_map", output_dir)
+
+
+# --- Crop white space from saved PNGs and PDFs ---
+# Run this after Script has saved all maps
+
+# --- Libraries ---
+library(magick)   # install.packages("magick")
+
+# --- Parameters ---
+output_dir <- "C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Figures/FINAL_2026-03-20/Sp_richness_gb_bg_locations_maps"
+
+# Fuzz: how aggressively to trim near-white pixels (0-100%)
+fuzz <- 2
+
+# Border: white padding (in pixels) added back after trimming
+# Increase for more breathing room around the map
+border_px <- 20
+
+# ------------------------------------------------------------------------------
+# PNG cropping
+# ------------------------------------------------------------------------------
+png_files <- list.files(output_dir, pattern = "\\.png$", full.names = TRUE)
+
+cat("--- Cropping PNGs ---\n")
+for (f in png_files) {
+  img         <- image_read(f)
+  img_trimmed <- image_trim(img, fuzz = fuzz)
+  img_padded  <- image_border(img_trimmed, color = "white",
+                              geometry = paste0(border_px, "x", border_px))
+  image_write(img_padded, path = f)
+  info <- image_info(img_padded)
+  cat(sprintf("Cropped: %s  [%d x %d px]\n", basename(f), info$width, info$height))
+}
+
+# ------------------------------------------------------------------------------
+# PDF cropping
+# ------------------------------------------------------------------------------
+pdf_files <- list.files(output_dir, pattern = "\\.pdf$", full.names = TRUE)
+
+cat("\n--- Cropping PDFs ---\n")
+for (f in pdf_files) {
+  img         <- image_read_pdf(f, density = 300)
+  img_trimmed <- image_trim(img, fuzz = fuzz)
+  img_padded  <- image_border(img_trimmed, color = "white",
+                              geometry = paste0(border_px, "x", border_px))
+  image_write(img_padded, path = f, format = "pdf")
+  cat(sprintf("Cropped: %s\n", basename(f)))
+}
+
+cat("\nDone. All files cropped in place.\n")
+
+
+### end script ###
