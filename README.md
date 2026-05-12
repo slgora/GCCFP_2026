@@ -1,13 +1,27 @@
+## Repository Structure
 
-Project repository for Global Consortum for Food Plants: Complementarity analysis
+This repository conatins code for the "Global Consortium for Food Plants: Complementarity Analysis" project. It is organized into folders reflecting the sequential stages of the analysis pipeline, as well as supporting folders for reusable code and experimental work.
 
-Repository structure:
-Main Folders:
-I_Data_preprocessing: Scripts for initial data cleaning and preparation.
-II_Data_processing: Scripts focused on core data wrangling and transformation.
-III_Metrics: Scripts to calculate, summarize, or visualize key metrics.
-IV_Figures: Code to generate publication-ready plots and figures.
+### Main Analysis Pipeline
 
-Functions: Helper R functions.
+- **I_Data_preprocessing/**
+  - Scripts for data extraction and taxon standardization.
 
-Other_scripts: Supplementary or experimental scripts outside the main analysis pipeline.
+- **II_Data_processing/**
+  - Scripts for data wrangling, cleaning, and transformation.
+
+- **III_Metrics/**
+  - Scripts to calculate, summarize, and visualize main metrics.
+
+- **IV_Figures/**
+  - Code to generate figures and maps.
+
+### Supporting Folders
+
+- **Functions/**
+  - Helper R functions for reuse throughout the analysis.
+
+- **Other_scripts/**
+  - Supplementary or experimental scripts outside the main analysis pipeline.
+
+---
