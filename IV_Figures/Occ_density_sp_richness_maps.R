@@ -1,7 +1,6 @@
-########################## Global Food Plant Occurrence Complementarity Maps ##########################
-# Author: Sarah Gora
-# Date: 2025_09_09
-# Updated: 2026_02_26
+# ==================================================================================
+# GCCFP Complementarity Project: Occurrence Density + Species Richness Maps Workflow
+# ==================================================================================
 # Description:
 #   - Generates overlays for 20km grid: occurrence and species richness heatmaps
 #   - Overlays: Botanic Garden, Genebank, and both, using buffered polygons (10km radius)
@@ -33,7 +32,6 @@ output_dir <- "C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Figures/F
 
 # occurrences: 5,489,253 rows
 occurrences_data <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_occurrences_dataset_2026-03-13.csv')
-
 # Note use: wcfp_name_match instead of genus_species
 
 # ------------------------------------------------------------------------------
@@ -607,11 +605,6 @@ for (map_def in map_definitions) {
 }
 
 
-
-
-
-
-
 # --- Crop white space from saved PNGs and PDFs ---
 # Run this after Script has saved all maps
 
@@ -663,196 +656,4 @@ cat("\nDone. All files cropped in place.\n")
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-################################################################################
-################## OLD FUNTIONS BELOW ##########################################
-
-# OLD SAVE_MAP_BOTH FUNCTION
-save_map_both <- function(p, filename, output_dir,
-                          width = 14, height = 7, dpi = 300,
-                          fill_legend_position = c(0.18, 0.40)) {
-  if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
-  
-  # Bottom legend: institution type only
-  p_for_color_legend <- p +
-    guides(
-      fill   = "none",
-      colour = guide_legend(
-        direction      = "horizontal",
-        title.position = "left",
-        title.hjust    = 0.5,
-        label.position = "right",
-        override.aes   = list(size = 3, alpha = 1)
-      )
-    ) +
-    theme(
-      legend.position       = "bottom",
-      legend.box            = "horizontal",
-      legend.background     = element_rect(fill = "transparent", color = NA),
-      legend.box.background = element_rect(fill = "transparent", color = NA),
-      legend.margin         = margin(6, 6, 6, 6)
-    )
-  color_legend <- cowplot::get_legend(p_for_color_legend)
-  
-  # Main plot: heatmap fill legend inset only
-  p_main <- p +
-    guides(
-      colour = "none",
-      fill   = guide_colorbar(
-        direction      = "vertical",
-        title.position = "top",
-        barheight      = unit(38, "mm"),
-        barwidth       = unit(6,  "mm")
-      )
-    ) +
-    theme(
-      legend.position       = fill_legend_position,
-      legend.justification  = c(0.5, 0.5),
-      legend.background     = element_rect(fill = "transparent", color = NA),
-      legend.box.background = element_rect(fill = "transparent", color = NA),
-      legend.margin         = margin(6, 6, 6, 6)
-    )
-  
-  combined <- cowplot::plot_grid(
-    p_main, color_legend,
-    ncol        = 1,
-    rel_heights = c(1, 0.11),
-    align       = "v"
-  )
-  
-  ggsave(
-    filename = file.path(output_dir, paste0(filename, ".png")),
-    plot     = combined,
-    width    = width, height = height, dpi = dpi,
-    bg       = "white"
-  )
-}
-
-
-# OLD LOOP 1. HAS CORRECT POINTS BUT NOT CORRECT LEGEND
-for (map_def in map_definitions) {
-  for (overlay in map_def$overlays) {
-    
-    # Base map + heatmap fill scale
-    p <- ggplot() +
-      geom_sf(data = world_plot, fill = "grey98", color = NA) +
-      geom_sf(data = map_def$grid_data, mapping = map_def$fill_aes, color = NA) +
-      scale_fill_gradient(
-        low      = "lightgreen",
-        high     = "darkgreen",
-        na.value = "white",
-        name     = map_def$fill_title,
-        labels   = label_comma_over_10000
-      ) +
-      geom_sf(data = world_plot, fill = NA, color = "grey80", linewidth = 0.2) +
-      
-      # FIX 1: reset fill scale for institution overlays
-      new_scale("fill")
-    
-    # Overlay institution polygons with new fill scale
-    if (is.list(overlay$data) && length(overlay$data) == 2) {
-      # Dual overlay — freeze loop vars locally
-      name1 <- overlay$name[1];  col1 <- overlay$color[1]
-      name2 <- overlay$name[2];  col2 <- overlay$color[2]
-      
-      p <- p +
-        geom_sf(data = overlay$data[[1]], aes(fill = inst_type),   # FIX 2: real column
-                color = NA, alpha = 0.5) +                          # FIX 3: no show.legend
-        geom_sf(data = overlay$data[[2]], aes(fill = inst_type),
-                color = NA, alpha = 0.5) +
-        scale_fill_manual(
-          name   = "Institution type",
-          values = c(setNames(col1, name1), setNames(col2, name2))
-        )
-    } else {
-      inst_name  <- overlay$name
-      inst_color <- overlay$color
-      
-      p <- p +
-        geom_sf(data = overlay$data, aes(fill = inst_type),        # FIX 2: real column
-                color = NA, alpha = 0.5) +                          # FIX 3: no show.legend
-        scale_fill_manual(
-          name   = "Institution type",
-          values = setNames(inst_color, inst_name)
-        )
-    }
-    
-    # Shared theme + graticule
-    p <- p +
-      labs(title = NULL) +
-      theme_minimal() +
-      theme(panel.background = element_rect(fill = "white", color = NA)) +
-      add_graticule_breaks(lon_breaks = lon_breaks, lat_breaks = lat_breaks) +
-      manual_graticule_theme() +
-      manual_graticule_coord() +
-      add_manual_graticule_labels(lon_breaks = lon_breaks, lat_breaks = lat_breaks)
-    
-    save_map_both(p, overlay$file, output_dir)
-    cat(sprintf("Saved: %s.png\n", overlay$file))
-  }
-}
-
-# OLD LOOP 2. HAS CORRRECT LEGEND BUT NOT CORRECT POINTS
-for (map_def in map_definitions) {
-  for (overlay in map_def$overlays) {
-    
-    p <- ggplot() +
-      geom_sf(data = world_plot, fill = "grey98", color = NA) +
-      geom_sf(data = map_def$grid_data, mapping = map_def$fill_aes, color = NA) +
-      geom_sf(data = world_plot, fill = NA, color = "grey80", linewidth = 0.2)
-    
-    if (is.list(overlay$data) && length(overlay$data) == 2) {
-      p <- p +
-        geom_sf(data = overlay$data[[1]], aes(color = overlay$name[1]),
-                size = pt_size, alpha = 0.4, show.legend = "point") +
-        geom_sf(data = overlay$data[[2]], aes(color = overlay$name[2]),
-                size = pt_size, alpha = 0.4, show.legend = "point") +
-        scale_color_manual(
-          name = "Institution type",
-          values = setNames(overlay$color, overlay$name),
-          guide = guide_legend(override.aes = list(size = 3, alpha = 1))
-        )
-    } else {
-      p <- p +
-        geom_sf(data = overlay$data, aes(color = overlay$name),
-                size = pt_size, alpha = 0.4, show.legend = "point") +
-        scale_color_manual(
-          name = "Institution type",
-          values = setNames(overlay$color, overlay$name),
-          guide = guide_legend(override.aes = list(size = 3, alpha = 1))
-        )
-    }
-    
-    p <- p +
-      scale_fill_gradient(
-        low = "lightgreen", high = "darkgreen", na.value = "white",
-        name = map_def$fill_title,
-        labels = label_comma_over_10000
-      ) +
-      labs(title = NULL, fill = map_def$fill_title) +
-      theme_minimal() +
-      theme(panel.background = element_rect(fill = "white", color = NA)) +
-      add_graticule_breaks(lon_breaks = lon_breaks, lat_breaks = lat_breaks) +
-      manual_graticule_theme() +
-      manual_graticule_coord() +
-      add_manual_graticule_labels(lon_breaks = lon_breaks, lat_breaks = lat_breaks)
-    
-    save_map_both(p, overlay$file, output_dir)
-    cat(sprintf("Saved: %s.png\n", overlay$file))
-  }
-}
-
-
-
-# END SCRIPT #
-
+### END SCRIPT ###
