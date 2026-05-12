@@ -1,6 +1,36 @@
 # =============================================================================
-# Complementarity figure - Figure 3
-# All numbers calculated from CURRENT DATASETS
+# Figure 3: Comparative Metrics Bar Figure - WCFP Complementarity Project
+# =============================================================================
+# Description:
+#   This script creates a comparative bar figure showing collection-level metrics
+#   (number of institutions, species, and accessions) for WCFP genebanks and
+#   botanic gardens. It uses current data files and DYNAMICALLY computes all
+#   numbers displayed in bars and labels (no hard-coding).
+#
+#   All numbers and proportions in the bars are computed directly from these
+#   source data files:
+#     - WCFP_genebank_accessionlevel_dataset_YYYY-MM-DD.csv
+#     - WCFP_botanicgarden_accessionlevel_dataset_YYYY-MM-DD.csv
+#     - WCFP_botanicgarden_specieslevel_dataset_YYYY-MM-DD.csv
+#     - WCFP_plantlist_standardized_YYYY-MM-DD.xlsx
+#
+# Calculations:
+#   - "Genebanks" and "Botanic gardens" in institutions: unique inst_code counts
+#     (botanic garden total is unique count combined across both accession- and
+#      species-level datasets).
+#   - "Species" presence: unique standardized taxa by source, reporting total,
+#     only-genebank, only-botgarden, both, and neither (using standardized plantlist).
+#   - "Accessions": simple counts (rows) from each accession-level file.
+#
+# Number formatting:
+#   - Displays commas for values >= 10,000; otherwise plain (e.g., 3,522 vs 8421)
+#
+# Editing and use:
+#   - To update the figure, just swap in new input data files as named below.
+#   - The PNG and PDF are written to the final figures folder.
+#   - All bar colors, positions, and plotting details remain as in published style.
+#
+# 2026-03-20  (auto-generated, modular, fully reproducible)
 # =============================================================================
 
 library(readr)
