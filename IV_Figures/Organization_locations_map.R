@@ -1,10 +1,15 @@
-########################## Institution Locations Maps ##########################
-# Author: Sarah Gora
-# Description:
-#   - Generates location maps for Genebanks, Botanic Gardens, and both combined
-#   - Matches exact format and style of Script 1 (Global Food Plant Occurrence Maps)
-#   - Output: High-resolution PNG (600 dpi) and PDF, saved to Script 1 output directory
+# =============================================================================
+# GCCFP Complementarity Project: Institution Locations Maps Workflow
+# =============================================================================
+#
+# This script generates world maps of locations for Genebanks, Botanic Gardens, 
+#  and both combined
+#   - Outputs: separate and combined maps, saved as high-res PNG and PDF.
+#   - Matches exact format, color, and style of main maps
+#   - After plotting, trims extra white space from image borders.
 #   - Point size: 0.8 for all institution points
+#
+# =============================================================================
 
 # --- Libraries ---
 library(dplyr)
@@ -24,14 +29,15 @@ library(cowplot)
 # all org: 22,276
 org_geo_data <- read_excel("C:/Users/sarah/Downloads/all_institutions_locations_corrected_2026-03-09.xlsx")
 
-#trim whitespace
+#trim whitespace in fields used (organization_type, latitude, longitude)
 org_geo_data <- org_geo_data %>%
   mutate(
     organization_type = str_trim(organization_type),
     latitude          = str_trim(latitude),
     longitude         = str_trim(longitude))
 
-#select only GENEBANKS and BOTANIC GARDENS: 6,836
+#select only GENEBANKS and BOTANIC GARDENS: 6,836 
+# removes any non-genebanks and non-botanic gardens organizations
 org_geo_data <- org_geo_data %>%
   filter(organization_type %in% c("Genebank", "Botanic garden"))
 
