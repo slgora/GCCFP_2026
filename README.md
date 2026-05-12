@@ -8,7 +8,7 @@ This repository contains code for the "Global Consortium for Food Plants: Comple
   - Scripts for data extraction and taxon standardization.
 
 - **II_Data_processing**
-  - Scripts for data wrangling, cleaning, and transformation.
+  - Scripts for data wrangling, cleaning, transformation and merging.
 
 - **III_Metrics**
   - Scripts to calculate, summarize, and visualize main metrics.
