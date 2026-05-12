@@ -27,7 +27,6 @@ library(ggnewscale)
 # --- Parameters & Paths ---
 output_dir <- "C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Figures/FINAL_2026-03-20/Sp_richness_gb_bg_locations_maps"
 
-output_dir <- "C:/Users/sarah/OneDrive/Desktop/GCCFP_2026/testing"
 # ------------------------------------------------------------------------------
 # --- Data Loading ---
 # ------------------------------------------------------------------------------
