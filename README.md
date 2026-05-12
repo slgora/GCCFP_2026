@@ -1,6 +1,6 @@
 ## Repository Structure
 
-This repository conatins code for the "Global Consortium for Food Plants: Complementarity Analysis" project. It is organized into folders reflecting the sequential stages of the analysis pipeline, as well as supporting folders for reusable code and experimental work.
+This repository contains code for the "Global Consortium for Food Plants: Complementarity Analysis" project. It is organized into folders reflecting the sequential stages of the analysis pipeline, as well as supporting folders for reusable code and experimental work.
 
 ### Main Analysis Pipeline
 
