@@ -82,7 +82,7 @@ bgci_df <- bgci_df %>%
 cat("BGCI after removing unassigned org_type:", nrow(bgci_df), "\n")
 
 # RESULT:
-# BGCI data with org type assigned: rows filtered for deletion and unassigned types
+# BGCI data with org type assigned: 618,544 rows
 write.csv(
   bgci_df,
   'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Deduplicated_with_org_assigned/bgci_org_assigned_2026-05-19.csv',
@@ -126,7 +126,7 @@ gen_wiews_df <- gen_wiews_df %>%
 cat("Gen/WIEWS after removing unassigned org_type:", nrow(gen_wiews_df), "\n")
 
 # RESULT:
-# Gen/WIEWS data with org type assigned: rows filtered for deletion and unassigned types
+# Gen/WIEWS data with org type assigned: 4,803,066 rows
 write.csv(
   gen_wiews_df,
   'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Deduplicated_with_org_assigned/gen_wiews_org_assigned_2026-05-19.csv',
@@ -175,7 +175,7 @@ cano_df <- cano_df %>%
 cat("Cano after removing unassigned org_type:", nrow(cano_df), "\n")
 
 # RESULT:
-# Cano data with org type assigned: rows filtered for deletion and unassigned types
+# Cano data with org type assigned: 316,489 rows
 write.csv(
   cano_df,
   'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Deduplicated_with_org_assigned/cano_org_assigned_2026-05-19.csv',
@@ -215,7 +215,32 @@ cat("GBIF-living after removing unassigned org_type:", nrow(gbif_living), "\n")
 
 # RESULT:
 # GBIF-living data with org type assigned: 72,863 rows
-write.csv(gbif_living,'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Deduplicated_with_org_assigned/gbif_living_org_assigned_2026-05-19.csv', row.names = FALSE)
+
+# ----------- SUBSET GBIF-LIVING DATA BY ORGANIZATION TYPE ------------#
+
+# GBIF living Genebank subset
+gbif_living_genebank_df <- gbif_living %>%
+  filter(organization_type == "Genebank")
+
+#save GBIF Living (Genebank): 8,216 rows
+write.csv(
+  gbif_living_genebank_df,
+  "C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/GBIF_data_living_genebank_2026-03-12.csv",
+  row.names = FALSE
+)
+cat("GBIF Living Genebank rows saved:", nrow(gbif_living_genebank_df), "\n")
+
+# GBIF living Botanic garden subset
+gbif_living_botanic_garden_df <- gbif_living %>%
+  filter(organization_type == "Botanic garden")
+
+# Save GBIF Living (Botanic garden): 64,647 rows
+write.csv(
+  gbif_living_botanic_garden_df,
+  "C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/GBIF_data_living_botanicgarden_2026-03-12.csv",
+  row.names = FALSE
+)
+cat("GBIF Living Botanic garden rows saved:", nrow(gbif_living_botanic_garden_df), "\n")
 
 
 ## end script ##
