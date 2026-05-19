@@ -216,7 +216,7 @@ WCFP_Cano_filtered <- WCFP_Cano_data %>%
 # check the dropped rows, there are zero
 Cano_dropped_rows <- anti_join(WCFP_Cano_data, WCFP_Cano_filtered, by = "genus_species")
 
-# Save Cano data: (already standardized) + filtered
+# Save Cano data: (already standardized) + filtered: 391,214 rows
 write.csv(WCFP_Cano_filtered, 'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Standardized_and_filtered/WCFP_Cano_data_filtered_2026-02-23.csv', row.names = FALSE)
 
 

@@ -22,6 +22,7 @@ library(readr)
 library(measurements)
 library(stringr)
 library(dplyr)
+library(tidyr)
 library(data.table)
 
 # --------------------------------
@@ -262,13 +263,11 @@ gen_wiews_df_dedup$STORAGE <- as.character(gen_wiews_df_dedup$STORAGE)
 # Save Genesys/WIEWs merged + depduplicated
 #write.csv(gen_wiews_df_dedup, 'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/De_dup_2026_03_06/gen_wiews_dedup_df_2026-03-06.csv', row.names = FALSE)
 
-#save deduplicated GENESYS DROPPED ROWS
-write.csv(gen_wiews_df_dedup,'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Standardized_and_filtered/Genesys_data_DROPPED_dedup_2026-04-16.csv', row.names = FALSE)
 
 # ---------------------------------------- # 
 # ----------- FINAL DATASET -------------- #
-# FINAL Genesys/WIEWS DATA: 4,819,513 rows
-# 2,035,742 total duplicate rows removed
+# FINAL Genesys/WIEWS DATA: 4,806,179 rows
+# 2,049,076 total duplicate rows removed
 # ----------------------------------------# 
 
 
@@ -276,7 +275,7 @@ write.csv(gen_wiews_df_dedup,'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_
 # ------------- Count rows after de-duplication -----------------------#
 # ---------------------------------------------------------------------#
 
-# Row count in dedup Genesys/WIEWS: 4,819,513 rows
+# Row count in dedup Genesys/WIEWS: 4,806,179 rows
 nrow(gen_wiews_df_dedup)
 
 # Row count in dedup Genesys: 3,574,451 rows
