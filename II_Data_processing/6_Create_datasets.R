@@ -389,15 +389,10 @@ write.csv(botanicgarden_specieslevel_dataset, 'C:/Users/sarah/OneDrive/Desktop/G
 #------------------------#
 
 # genebank accession-level dataset with coords: 1,279,015 rows
-#genebank_accessionlevel_dataset_with_coords <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_genebank_accessionlevel_dataset_with_coords_2026-03-13.csv')
-
-genebank_accessionlevel_dataset_with_coords <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Standardized_and_filtered/Genesys_DROPPED_genebank_accessionlevel_dataset_with_coords_2026-04-16.csv')
+genebank_accessionlevel_dataset_with_coords <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_genebank_accessionlevel_dataset_with_coords_2026-03-13.csv')
 
 # botanic garden accession-level dataset with coords: 19,007 rows
-#botanicgarden_accessionlevel_dataset_with_coords <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_botanicgarden_accessionlevel_dataset_with_coords_2026-03-13.csv')
-
-botanicgarden_accessionlevel_dataset_with_coords <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Standardized_and_filtered/Genesys_DROPPED_botanicgarden_accessionlevel_dataset_with_coords_2026-04-16.csv')
-
+botanicgarden_accessionlevel_dataset_with_coords <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_botanicgarden_accessionlevel_dataset_with_coords_2026-03-13.csv')
 
 # GBIF observations with coords: 4,191,231 rows
 gbif_observations_df <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/GBIF_data_observations_2026-03-12.csv")
@@ -461,10 +456,7 @@ occurrences_dataset <- rbind(genebank_accessionlevel_dataset_with_coords,
                              botanicgarden_accessionlevel_dataset_with_coords, 
                              gbif_observations_df)
 #save
-#write.csv(occurrences_dataset, 'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_occurrences_dataset_2026-03-13.csv', row.names = FALSE)
-
-#save genesys dropped
-write.csv(occurrences_dataset,'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Standardized_and_filtered/Genesys_DROPPED_occurrences_2026-04-16.csv', row.names = FALSE)
+write.csv(occurrences_dataset, 'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_occurrences_dataset_2026-03-13.csv', row.names = FALSE)
 
 
 #######################################################
@@ -516,11 +508,6 @@ norm_taxa <- function(name) {
 # Apply the function to create the norm_taxa field in cano_df
 occurrences_dataset2 <- occurrences_dataset %>%
   mutate(norm_taxa = norm_taxa(taxa))
-
-
-occurrences_arctic2 <- occurrences_arctic %>%
-  mutate(norm_taxa = norm_taxa(taxa))
-occurrences_arctic <- occurrences_arctic2
 
 
 genebank_accessionlevel_dataset <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_genebank_accessionlevel_dataset_2026-03-13.csv')
