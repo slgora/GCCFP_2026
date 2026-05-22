@@ -2,7 +2,7 @@
 #                                                                             #
 #    PETER G DEDUPLICATION METHODOLOGY VERSION 1 (V1)                         #
 #    Duplicate removal by selection of data source with greatest number of    #
-#    records per instcode (1 data source per instcode))                       #
+#    records per instcode (1 data source per instcode)                        #
 #                                                                             #
 #    Deduplication Method:                                                    #
 #    - For each organization (inst_code), only ONE data source is kept:       #
