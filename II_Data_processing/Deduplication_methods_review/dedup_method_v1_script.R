@@ -169,19 +169,19 @@ species_summary_list[['step1']] <- per_source_summary(
 # -----------------------------------------------------------------------------#
 # This section ensures the key identifier fields are cleaned (no leading/trailing whitespace)
 # and creates a unique accession ID for deduplication and merging:
-#      - ID = ACCENUMB + inst_code + WCFP_name_match
+#      - ID = ACCENUMB + inst_code + genus_species_WFO (standardized genus + species to WFO)
 #      - Spaces within the concatenated ID string are entirely removed
 
 # Trim whitespace in key fields for consistency
 gen_wiews_df$ACCENUMB          <- trimws(gen_wiews_df$ACCENUMB)
 gen_wiews_df$inst_code         <- trimws(gen_wiews_df$inst_code)
-gen_wiews_df$WCFP_name_match   <- trimws(gen_wiews_df$WCFP_name_match)
+gen_wiews_df$WCFP_name_match   <- trimws(gen_wiews_df$genus_species_WFO)
 
-# Create unique ID: concatenate ACCENUMB, inst_code, WCFP_name_match (no separator)
+# Create unique ID: concatenate ACCENUMB, inst_code, genus_species_WFO (no separator)
 gen_wiews_df$ID <- paste0(
   gen_wiews_df$ACCENUMB,
   gen_wiews_df$inst_code,
-  gen_wiews_df$WCFP_name_match
+  gen_wiews_df$genus_species_WFO
 )
 
 # Remove all spaces that may exist in the new ID
