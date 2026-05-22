@@ -2,8 +2,8 @@
 # WCFP Complementarity Project: COMPLETE GBIF OCCURRENCE DATA WORKFLOW
 # =============================================================================
 #
-# This script performs a full, reproducible workflow for handling GBIF plant
-# occurrence data for the WCFP project. It covers the following steps:
+# This script performs a full, reproducible workflow for extracting plant
+# occurrence data via GBIF API for the WCFP project. It covers the following steps:
 #
 #   1. Downloads and/or loads old and new WCFP plantlists.
 #   2. Extracts GBIF occurrence data for each species in chunked batches,
@@ -29,7 +29,6 @@
 #   - Section 8 can always be run for fast appending of already-exported Part 1/2
 #   - Adjust file paths as needed for your computing environment
 #
-# No emojis used. Script is modular and annotated throughout.
 #
 # =============================================================================
 
