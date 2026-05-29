@@ -10,24 +10,27 @@
 # added normalized taxa field 
 
 # load libraries
-
+library(readr)
 
 # ----- READ IN DATA ---- # 
 
-# GEN/WIEWS: 4,803,066 rows
-gen_wiews_df <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Deduplicated_with_org_assigned/gen_wiews_dedup_org_assigned_2026-03-13.csv')
+### Genesys/WIEWS data: 4,701,257 rows
+# Genesys data: 3,474,330 rows
+# WIEWS data: 1,226,927 rows
+gen_wiews_df <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Dedup_data/Dedup_data_2026_05_28/gen_wiews_data_dedup_2026_05_28.csv")
 
-# Cano: 316,489 rows
-cano_df <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Deduplicated_with_org_assigned/cano_dedup_org_assigned_2026-03-13.csv')
+# Cano data: 374,409 rows
+cano_df <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Dedup_data/Dedup_data_2026_05_28/cano_data_dedup_2026_05_28.csv")
 
-# BGCI PlantSearch: 618,544 rows
-bgci_df <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Deduplicated_with_org_assigned/bgci_org_assigned_2026-03-10.csv')
+# BGCI data: 560,271 rows
+bgci_df <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Dedup_data/Dedup_data_2026_05_28/bgci_data_dedup_2026_05_28.csv")
 
-# GBIF Living (Genebank): 8,216 rows
-gbif_living_genebank_df <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/GBIF_data_living_genebank_2026-03-12.csv")
+# GBIF-living genebank data: 21,461 rows
+gbif_living_genebank_df <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Dedup_data/Dedup_data_2026_05_28/gbif_living_genebank_data_dedup_2026_05_28.csv")
 
-# GBIF Living (Botanic garden): 64,647 rows
-gbif_living_botanic_garden_df <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/GBIF_data_living_botanicgarden_2026-03-12.csv")
+# GBIF-living botanic garden data: 51,206 rows
+gbif_living_botanic_garden_df <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Dedup_data/Dedup_data_2026_05_28/gbif_living_botanicgarden_data_dedup_2026_05_28.csv")
+
 
 # GardenSearch + FAO WIEWs Institute directory
 all_organizations_locations <- read_excel("C:/Users/sarah/Downloads/all_organizations_locations_corrected_2026-03-09 (1).xlsx")
@@ -36,8 +39,8 @@ all_organizations_locations <- read_excel("C:/Users/sarah/Downloads/all_organiza
 # -----------------------------------------------------------------#
 # --- Prep Gen/WIEWS data ---- #
 
-# READ in GEN/WIEWS: 4,803,066 rows
-gen_wiews_df <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Deduplicated_with_org_assigned/gen_wiews_dedup_org_assigned_2026-03-13.csv')
+# READ in GEN/WIEWS: 4,700,251 rows
+#gen_wiews_df <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Dedup_data/Dedup_data_2026_05_28/gen_wiews_data_dedup_2026_05_28.csv")
 
 #stage new fields for join below
 gen_wiews_df$inst_id_gbif <- NA
@@ -96,11 +99,11 @@ gen_wiews_df <- gen_wiews_df %>%
 # DATASET 1. Genebank accession-level 
 #---------------------------------------#
 
-# Genesys/WIEWS (Genebank): 4,747,621 rows
+# Genesys/WIEWS (Genebank): 4,650,689 rows
 gen_wiews_genebank_df <- gen_wiews_df %>% filter(inst_type == "Genebank")
 
-# GBIF Living (Genebank): 8,216 rows
-gbif_living_genebank_df <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/GBIF_data_living_genebank_2026-03-12.csv")
+# GBIF Living (Genebank):
+#gbif_living_genebank_df <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Dedup_data/Dedup_data_2026_05_28/gbif_living_genebank_data_dedup_2026_05_28.csv")
 
 #stage new fields for join below
 gbif_living_genebank_df$acce_numb <- NA
@@ -152,22 +155,18 @@ gbif_living_genebank_df <- gbif_living_genebank_df%>%
     data_source = data_source )
 
 
-# Genebank-accession-level dataset: 4,755,837 rows
+# Genebank-accession-level dataset: 4,672,150 rows
 genebank_accessionlevel_dataset <- rbind(gen_wiews_genebank_df, gbif_living_genebank_df)
 #save
-write.csv(genebank_accessionlevel_dataset, 'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_genebank_accessionlevel_dataset_2026-03-13.csv', row.names = FALSE)
+write.csv(genebank_accessionlevel_dataset, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_datasets/genebank_accessionlevel_dataset_2026-05-28.csv', row.names = FALSE)
 
 
-# Genebank-accession-level dataset WITH COORDS: 1,279,015 rows
+# Genebank-accession-level dataset WITH COORDS: 1237771 rows
 genebank_accessionlevel_dataset_with_coords <- genebank_accessionlevel_dataset %>%
   filter( !(is.na(latitude) | is.na(longitude) | 
               !between(latitude, -90, 90) | !between(longitude, -180, 180)))
 #save
-#write.csv(genebank_accessionlevel_dataset_with_coords, 'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_genebank_accessionlevel_dataset_with_coords_2026-03-13.csv', row.names = FALSE)
-
-#save genesys dropped
-write.csv(genebank_accessionlevel_dataset_with_coords,'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Standardized_and_filtered/Genesys_DROPPED_genebank_accessionlevel_dataset_with_coords_2026-04-16.csv', row.names = FALSE)
-
+write.csv(genebank_accessionlevel_dataset_with_coords, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Coords_datasets/genebank_accessionlevel_dataset_with_coords_2026-05-28.csv', row.names = FALSE)
 
 
 
@@ -175,8 +174,8 @@ write.csv(genebank_accessionlevel_dataset_with_coords,'C:/Users/sarah/OneDrive/D
 # DATASET 2. Botanic garden accession-level 
 #-----------------------------------------#
 
-# Cano: 316,489 rows
-cano_df <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Deduplicated_with_org_assigned/cano_dedup_org_assigned_2026-03-13.csv')
+# Cano: rows
+#cano_df <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Dedup_data/Dedup_data_2026_05_28/cano_data_dedup_2026_05_28.csv")
 
 # Create a new field 'taxa' by combining taxon_name and taxon_authors_accepted separated by a space
 cano_df <- cano_df %>%
@@ -192,7 +191,6 @@ cano_df$inst_id_gbif <- NA
 cano_df$samp_stat <- NA
 cano_df$latitude <- NA
 cano_df$longitude <- NA
-
 
 # Select and then rename only the specified fields in cano_df
 cano_df <- cano_df %>%
@@ -242,10 +240,7 @@ cano_df <- cano_df %>%
 
 
 
-
-
-
-# Genesys/WIEWS (Botanic garden): 55,445 rows
+# Genesys/WIEWS (Botanic garden): 50,568 rows
 gen_wiews_botanic_garden_df <- gen_wiews_df %>% filter(inst_type == "Botanic garden")
 #stage new field for join below
 gen_wiews_botanic_garden_df$LC <- NA
@@ -258,8 +253,8 @@ gen_wiews_botanic_garden_df <- gen_wiews_botanic_garden_df %>%
 
 
 
-# GBIF Living (Botanic garden): 64,647 rows
-gbif_living_botanic_garden_df <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/GBIF_data_living_botanicgarden_2026-03-12.csv")
+#GBIF Living (Botanic garden):  rows
+#gbif_living_botanic_garden_df <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Dedup_data/Dedup_data_2026_05_28/gbif_living_botanicgarden_data_dedup_2026_05_28.csv")
 
 #stage new fields for join below
 gbif_living_botanic_garden_df$acce_numb <- NA
@@ -314,26 +309,20 @@ gbif_living_botanic_garden_df <- gbif_living_botanic_garden_df %>%
     data_source = data_source )
 
 
-
-## Botanic garden accession-level dataset: 436,581 rows ##
+## Botanic garden accession-level dataset: 476,183 rows ##
 botanicgarden_accessionlevel_dataset <- rbind(cano_df, gen_wiews_botanic_garden_df, gbif_living_botanic_garden_df)
 #save
-#write.csv(botanicgarden_accessionlevel_dataset, 'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_botanicgarden_accessionlevel_dataset_2026-03-13.csv', row.names = FALSE)
+write.csv(botanicgarden_accessionlevel_dataset, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_datasets/botanicgarden_accessionlevel_dataset_2026-05-28.csv', row.names = FALSE)
 
 
-## Botanic garden accession-level dataset WITH COORDS: 19,007 rows ##
+## Botanic garden accession-level dataset WITH COORDS: 13,316 rows ##
 botanicgarden_accessionlevel_dataset_with_coords <- botanicgarden_accessionlevel_dataset %>% 
   filter( !(is.na(latitude) | is.na(longitude) | 
               !between(latitude, -90, 90) | !between(longitude, -180, 180)))
 # Drop LC (no cano data)
 botanicgarden_accessionlevel_dataset_with_coords <- botanicgarden_accessionlevel_dataset_with_coords %>% select(-LC)
 #save
-#write.csv(botanicgarden_accessionlevel_dataset_with_coords, 'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_botanicgarden_accessionlevel_dataset_with_coords_2026-03-13.csv', row.names = FALSE)
-
-#save genesys dropped
-write.csv(botanicgarden_accessionlevel_dataset_with_coords,'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Standardized_and_filtered/Genesys_DROPPED_botanicgarden_accessionlevel_dataset_with_coords_2026-04-16.csv', row.names = FALSE)
-
-
+write.csv(botanicgarden_accessionlevel_dataset_with_coords, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Coords_datasets/botanicgarden_accessionlevel_dataset_with_coords_2026-05-28.csv', row.names = FALSE)
 
 
 
@@ -341,8 +330,8 @@ write.csv(botanicgarden_accessionlevel_dataset_with_coords,'C:/Users/sarah/OneDr
 # DATASET 3. Botanic garden species/institute-level
 #--------------------------------------------------#
 
-# BGCI PlantSearch: 618,544 rows
-bgci_df <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Deduplicated_with_org_assigned/bgci_org_assigned_2026-03-10.csv')
+# BGCI PlantSearch:  rows
+#bgci_df <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Dedup_data/Dedup_data_2026_05_28/bgci_data_dedup_2026_05_28.csv")
 
 # Select and then rename only the specified fields in bgci_df
 botanicgarden_specieslevel_dataset <- bgci_df %>%
@@ -378,9 +367,9 @@ botanicgarden_specieslevel_dataset <- bgci_df %>%
     longitude = longitude,
     data_source = data_source )
 
-## Botanic garden species/inst level dataset: 618,544 rows ##
+## Botanic garden species/inst level dataset: 550,271 rows ##
 #save
-write.csv(botanicgarden_specieslevel_dataset, 'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_botanicgarden_specieslevel_dataset_2026-03-13.csv', row.names = FALSE)
+write.csv(botanicgarden_specieslevel_dataset, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_datasets/botanicgarden_specieslevel_dataset_2026-05-28.csv', row.names = FALSE)
 
 
 
@@ -388,21 +377,25 @@ write.csv(botanicgarden_specieslevel_dataset, 'C:/Users/sarah/OneDrive/Desktop/G
 # DATASET 4. Occurrences
 #------------------------#
 
-# genebank accession-level dataset with coords: 1,279,015 rows
-genebank_accessionlevel_dataset_with_coords <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_genebank_accessionlevel_dataset_with_coords_2026-03-13.csv')
+# genebank accession-level dataset with coords: 1,237,771 rows
+genebank_accessionlevel_dataset_with_coords <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Coords_datasets/genebank_accessionlevel_dataset_with_coords_2026-05-28.csv")
 
-# botanic garden accession-level dataset with coords: 19,007 rows
-botanicgarden_accessionlevel_dataset_with_coords <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_botanicgarden_accessionlevel_dataset_with_coords_2026-03-13.csv')
+# botanic garden accession-level dataset with coords: 13,316 rows
+botanicgarden_accessionlevel_dataset_with_coords <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Coords_datasets/botanicgarden_accessionlevel_dataset_with_coords_2026-05-28.csv")
 
-# GBIF observations with coords: 4,191,231 rows
-gbif_observations_df <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/GBIF_data_observations_2026-03-12.csv")
+# GBIF observations with coords:  rows
+#gbif_observations_df <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/GBIF_data_observations_2026-03-12.csv")
+
+#NEW
+# SAVE RAW GBIF OBSERVATIONS: 6,701,782 rows
+gbif_observations_df <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/GBIF_data_observations_2026-05-28.csv")
 
 #stage new fields for join below
 gbif_observations_df$acce_numb <- NA
 gbif_observations_df$doi <- NA
 gbif_observations_df$samp_stat <- NA
 
-# Select and then rename only the specified fields in gen_wiews_df
+# Select and then rename only the specified fields in gbif_observations_df
 gbif_observations_df <- gbif_observations_df %>%
   select(
     WCFP_name_match,
@@ -446,109 +439,18 @@ gbif_observations_df <- gbif_observations_df %>%
     longitude = longitude,
     data_source = data_source )
 
-#check coords
+#REMOVE DATA WITH INVLAID OR MISSING COORDS FROM GBIF OBSERVATIONS
+# GBIF observations with valid coords: 4,191,231 rows
 gbif_observations_df <- gbif_observations_df %>% # 
   filter( !(is.na(latitude) | is.na(longitude) | 
               !between(latitude, -90, 90) | !between(longitude, -180, 180)))
 
-## Occurrences dataset: 5,489,253 rows ##
+## Occurrences dataset: 5,442,318 rows ##
 occurrences_dataset <- rbind(genebank_accessionlevel_dataset_with_coords, 
                              botanicgarden_accessionlevel_dataset_with_coords, 
                              gbif_observations_df)
 #save
-write.csv(occurrences_dataset, 'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_occurrences_dataset_2026-03-13.csv', row.names = FALSE)
-
-
-#######################################################
-############## ADD NORMALIZED TAXA FIELD ###############
-#######################################################
-
-# Function to normalize taxa names while keeping varieties and all taxonomic ranks
-norm_taxa <- function(name) {
-  name %>%
-    str_replace_all("'[^']*'", "") %>%                  # remove cultivar names in single quotes e.g. 'Wheeler's Variety'
-    str_replace_all("\\b[×x]\\b", " × ") %>%            # handle × symbol
-    str_replace_all("\\+", " + ") %>%                   # handle + sign
-    str_replace_all("\\.", "") %>%                       # remove ALL periods (so "var." becomes "var")
-    str_squish() %>%
-    str_split("\\s+") %>%
-    map_chr(~ {
-      tokens <- .x[.x != "×" & .x != "+"]              # remove × and + tokens
-      
-      # Capitalize first token (genus)
-      if (length(tokens) >= 1) tokens[1] <- str_to_title(tokens[1])
-      
-      # Lowercase remaining tokens
-      if (length(tokens) >= 2) tokens[2:length(tokens)] <- str_to_lower(tokens[2:length(tokens)])
-      
-      # Define all taxonomic rank abbreviations to keep
-      rank_abbrevs <- c("var", "subsp", "f", "subf", "sect", "subsect",
-                        "ser", "subser", "aff", "cf", "nothovar", "nothosubsp",
-                        "nothof", "aggr", "sensu", "sl", "ss",
-                        "ssp", "cv", "forma", "tribe", "subtribe", "convar")
-      
-      # Find first rank abbreviation present in tokens
-      rank_index <- which(str_to_lower(tokens) %in% rank_abbrevs)[1]
-      
-      if (!is.na(rank_index) && length(tokens) >= rank_index + 1) {
-        # Keep genus + species + rank abbreviation (with period) + rank name
-        paste(c(tokens[1:2], paste0(str_to_lower(tokens[rank_index]), "."), tokens[rank_index + 1]), collapse = " ")
-      } else if (length(tokens) >= 2) {
-        paste(tokens[1:2], collapse = " ")
-      } else {
-        NA_character_
-      }
-    })
-}
-
-# Apply the function to create the norm_taxa field in cano_df
-#cano_df <- cano_df %>%
-#  mutate(norm_taxa = norm_taxa(taxa))
-
-# Apply the function to create the norm_taxa field in cano_df
-occurrences_dataset2 <- occurrences_dataset %>%
-  mutate(norm_taxa = norm_taxa(taxa))
-
-
-genebank_accessionlevel_dataset <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_genebank_accessionlevel_dataset_2026-03-13.csv')
-botanicgarden_accessionlevel_dataset <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_botanicgarden_accessionlevel_dataset_2026-03-13.csv')
-botanicgarden_specieslevel_dataset <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_botanicgarden_specieslevel_dataset_2026-03-13.csv')
-occurrences_dataset <- read_csv('C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_occurrences_dataset_2026-03-13.csv')
-
-
-
-
-
-
-####################################
-#### ADD INTERNATIONAL STATUS ######
-####################################
-
-# International genebanks list
-internationalgenebanks_list <- read_excel("C:/Users/sarah/Downloads/internationalgenebanks_list (1).xlsx")
-
-# Select and then rename only the specified fields
-internationalgenebanks_list <- internationalgenebanks_list %>%
-  select(instCode,internationalStatus) %>%
-  rename(inst_code = instCode, inst_status = internationalStatus)
-
-# Replace "Y" with "international" in 'inst_status'
-internationalgenebanks_list$inst_status[internationalgenebanks_list$inst_status == "Y"] <- "International"
-
-#trim whitespace for match
-internationalgenebanks_list <- internationalgenebanks_list %>% mutate(inst_code = trimws(inst_code)) 
-
-#remove dup
-internationalgenebanks_list <- internationalgenebanks_list %>% distinct(inst_code, .keep_all = TRUE)
-
-# ASSIGN inst_status (international)
-genebank_accessionlevel_dataset <- internationalgenebanks_list %>%
-  right_join(genebank_accessionlevel_dataset, by = c("inst_code"))
-
-#save
-write.csv(genebank_accessionlevel_dataset, 'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_genebank_accessionlevel_dataset_2026-03-17.csv', row.names = FALSE)
-
-
+write.csv(occurrences_dataset, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_datasets/occurrences_dataset_2026-05-28.csv', row.names = FALSE)
 
 
 
@@ -560,15 +462,14 @@ write.csv(genebank_accessionlevel_dataset, 'C:/Users/sarah/OneDrive/Desktop/GCCF
 all_organizations_locations <- read_excel("C:/Users/sarah/Downloads/all_organizations_locations_corrected_2026-03-09 (1).xlsx")
 
 # Keep only rows where organization_type is "Genebank" or "Botanic garden"    #6,834
-all_organizations_locations2 <- all_organizations_locations %>%
+all_organizations_locations <- all_organizations_locations %>%
   filter(organization_type %in% c("Genebank", "Botanic garden"))
-
-all_organizations_locations3 <- all_organizations_locations2 %>% # 4,891 rows
+# Keep organizations with valid lat/long
+all_organizations_locations <- all_organizations_locations2 %>% # 4,891 rows
   filter( !(is.na(latitude) | is.na(longitude) | 
               !between(latitude, -90, 90) | !between(longitude, -180, 180)))
 
-
-# save?
-
+# save
+write.csv(all_organizations_locations, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_datasets/organization_locations_dataset_2026-05-28.csv', row.names = FALSE)
 
 ## end script ##
