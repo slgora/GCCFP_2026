@@ -33,7 +33,7 @@ suppressPackageStartupMessages({
 # ---------------------------------
 # DATA READ In and set output path
 # --------------------------------
-infile <- "C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_datasets/occurrences_dataset_2026-05-27.csv"
+infile <- "C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_datasets/occurrences_dataset_2026-05-28.csv"
 
 out_dir <- "C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_metrics/EOO_AOO"
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
