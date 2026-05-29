@@ -30,12 +30,12 @@ suppressPackageStartupMessages({
   library(readxl)
 })
 
-# -----------------------------
-# USER SETTINGS
-# -----------------------------
-infile <- "C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Datasets_FINAL/WCFP_occurrences_dataset_2026-03-13.csv"
+# ---------------------------------
+# DATA READ In and set output path
+# --------------------------------
+infile <- "C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_datasets/occurrences_dataset_2026-05-27.csv"
 
-out_dir <- "C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Metrics/AOO_EOO"
+out_dir <- "C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_metrics/EOO_AOO"
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 
 species_col <- "wcfp_name_match"
@@ -430,9 +430,9 @@ cat(" -", file.path(out_dir, "eoo_vs_aoo_scatter.png"), "\n")
 # =====================================================================
 # SEPARATE STEP: Merge metrics into plant list and save v2
 # =====================================================================
-plant_in <- "C:/Users/sarah/Downloads/wcfp_plantlist_with_EOO_AOO.xlsx"
+plant_in <- "C:/Users/sarah/Downloads/wcfp_plantlist_2026_05_27.xlsx"
 metrics_in <- combined_path
-plant_out <- "C:/Users/sarah/Downloads/wcfp_plantlist_with_EOO_AOO_v2.xlsx"
+plant_out <- "C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_metrics/EOO_AOO/wcfp_plantlist_with_EOO_AOO.xlsx"
 
 wcfp_plantlist <- read_excel(plant_in)
 metrics <- read.csv(metrics_in, stringsAsFactors = FALSE)
@@ -457,3 +457,4 @@ cat("Rows in plant list:", nrow(wcfp_plantlist_v2), "\n")
 cat("Rows with matched EOO:", sum(!is.na(wcfp_plantlist_v2$EOO_km2)), "\n")
 cat("Rows with matched AOO:", sum(!is.na(wcfp_plantlist_v2$AOO_km2)), "\n")
 
+### end script ###
