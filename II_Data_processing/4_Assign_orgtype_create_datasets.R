@@ -65,12 +65,12 @@ org_guide <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Dat
 #----------------------- STEP 1. Prep data ------------------------
 # -----------------------------------------------------------------#
 
-# Prep organization guide file
+# Clean fields in organization guide file
 org_guide <- org_guide %>%
   mutate(inst_code = trimws(inst_code),
          organization_type = trimws(organization_type))
 
-# -- Harmonize data: Type coercion as character for inst_code --
+# Harmonize data: Type coercion as character for inst_code
 genesys_df$inst_code      <- as.character(genesys_df$inst_code)
 wiews_df$inst_code        <- as.character(wiews_df$inst_code)
 bgci_df$inst_code         <- as.character(bgci_df$inst_code)
@@ -208,10 +208,13 @@ print(summary_df)
 #---------------------------------------------------
 
 # -------------------------
-# View which inst_codes were removed from any dataset
+# View inst_codes removed from data
 # -------------------------
+print(res_genesys$removed_inst_codes)
+print(res_wiews$removed_inst_codes)
+print(res_bgci$removed_inst_codes) 
+print(res_cano$removed_inst_codes) # 0 instcodes removed from Cano
 print(res_gbif$removed_inst_codes)
-print(res_bgci$removed_inst_codes)
 
 
 # -----------------------------------------------------------------#
@@ -219,14 +222,14 @@ print(res_bgci$removed_inst_codes)
 # -----------------------------------------------------------------#
 
 # --- Prep Gen/WIEWS data ---- #
-# combine gen/wiews
+#combine gen/wiews
 gen_wiews_df <- bind_rows(genesys_df, wiews_df)
 
 #stage new fields for join below
 gen_wiews_df$inst_id_gbif <- NA
 gen_wiews_df$collection_code <- NA
 
-# Select and then rename only the specified fields in gen_wiews_df
+#select and then rename only the specified fields in gen_wiews_df
 gen_wiews_df <- gen_wiews_df %>%
   select(
     WCFP_name_match,
@@ -272,7 +275,7 @@ gen_wiews_df <- gen_wiews_df %>%
 # DATASET 1. Genebank accession-level 
 #---------------------------------------#
 
-# Genesys/WIEWS (Genebank): 6,752,850 rows
+## Genesys/WIEWS (Genebank): 6,752,850 rows
 # Genesys: 3,563,673 rows
 # WIEWS: 3,189,177 rows
 gen_wiews_genebank_df <- gen_wiews_df %>% filter(inst_type == "Genebank")
@@ -285,7 +288,7 @@ gbif_living_genebank_df$acce_numb <- NA
 gbif_living_genebank_df$doi <- NA
 gbif_living_genebank_df$samp_stat <- NA
 
-# Select and then rename only the specified fields
+#select and then rename only the specified fields
 gbif_living_genebank_df <- gbif_living_genebank_df%>%
   select(
     WCFP_name_match,
@@ -306,8 +309,7 @@ gbif_living_genebank_df <- gbif_living_genebank_df%>%
     country_code,
     latitude,
     longitude,
-    data_source
-  ) %>%
+    data_source) %>%
   rename(
     wcfp_name_match = WCFP_name_match,
     acce_numb = acce_numb,
@@ -328,11 +330,10 @@ gbif_living_genebank_df <- gbif_living_genebank_df%>%
     longitude = longitude,
     data_source = data_source )
 
-
 # Genebank-accession-level dataset:  6,786,269 rows
 genebank_accessionlevel_dataset <- rbind(gen_wiews_genebank_df, gbif_living_genebank_df)
 #save
-write.csv(genebank_accessionlevel_dataset, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_datasets/genebank_accessionlevel_dataset_2026-05-29.csv', row.names = FALSE)
+write.csv(genebank_accessionlevel_dataset, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Outputs_script4_2026-06-02/genebank_accessionlevel_dataset_prepped_2026-06-02.csv', row.names = FALSE)
 
 
 # ----------------------------------------#
@@ -370,8 +371,7 @@ cano_df <- cano_df %>%
     provenance_code,
     latitude,
     longitude,
-    data_source
-  ) %>%
+    data_source ) %>%
   rename(
     wcfp_name_match = WCFP_name_match,
     acce_numb = item_acc_no_full,
@@ -403,7 +403,7 @@ gen_wiews_botanic_garden_df <- gen_wiews_df %>% filter(inst_type == "Botanic gar
 #stage new field for join below
 gen_wiews_botanic_garden_df$LC <- NA
 
-# Select and re-order fields
+#select and re-order fields
 gen_wiews_botanic_garden_df <- gen_wiews_botanic_garden_df %>%
   select(wcfp_name_match, acce_numb, doi, taxa, genus_species, standardized_taxa_wfo, standardized_genus_wfo, standardized_genus_species_wfo,
          LC, inst_id_gbif, inst_code, inst_name, inst_type, collection_code, basis_of_record, 
@@ -420,7 +420,7 @@ gbif_living_botanic_garden_df$doi <- NA
 gbif_living_botanic_garden_df$samp_stat <- NA
 gbif_living_botanic_garden_df$LC <- NA
 
-# Select and then rename only the specified fields
+#select and then rename only the specified fields
 gbif_living_botanic_garden_df <- gbif_living_botanic_garden_df %>%
   select(
     WCFP_name_match,
@@ -442,8 +442,7 @@ gbif_living_botanic_garden_df <- gbif_living_botanic_garden_df %>%
     country_code,
     latitude,
     longitude,
-    data_source
-  ) %>%
+    data_source) %>%
   rename(
     wcfp_name_match = WCFP_name_match,
     acce_numb = acce_numb,
@@ -470,7 +469,8 @@ gbif_living_botanic_garden_df <- gbif_living_botanic_garden_df %>%
 ## Botanic garden accession-level dataset: 558,308 rows
 botanicgarden_accessionlevel_dataset <- rbind(cano_df, gen_wiews_botanic_garden_df, gbif_living_botanic_garden_df)
 #save
-write.csv(botanicgarden_accessionlevel_dataset, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_datasets/botanicgarden_accessionlevel_dataset_2026-05-29.csv', row.names = FALSE)
+write.csv(botanicgarden_accessionlevel_dataset, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Outputs_script4_2026-06-02/botanicgarden_accessionlevel_dataset_prepped_2026-06-02.csv', row.names = FALSE)
+
 
 
 # -------------------------------------------------#
@@ -479,7 +479,7 @@ write.csv(botanicgarden_accessionlevel_dataset, 'C:/Users/sarah/My Drive/GCCFP_2
 
 # BGCI PlantSearch: 618,544 rows
 
-# Select and then rename only the specified fields in bgci_df
+#select and then rename only the specified fields in bgci_df
 botanicgarden_specieslevel_dataset <- bgci_df %>%
   select(
     WCFP_name_match,
@@ -495,8 +495,7 @@ botanicgarden_specieslevel_dataset <- bgci_df %>%
     country_code,
     latitude,
     longitude,
-    data_source
-  ) %>%
+    data_source) %>%
   rename(
     wcfp_name_match = WCFP_name_match,
     plantsearch_id = plantsearch_id,
@@ -515,7 +514,7 @@ botanicgarden_specieslevel_dataset <- bgci_df %>%
 
 ## FINAL: Botanic garden species/inst level dataset: 618,544 rows
 #save
-write.csv(botanicgarden_specieslevel_dataset, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/FINAL_DATA_2026_06_01/botanicgarden_specieslevel_dataset_2026-06-01.csv', row.names = FALSE)
+write.csv(botanicgarden_specieslevel_dataset, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Outputs_script4_2026-06-02/botanicgarden_specieslevel_dataset_FINAL_2026-06-02.csv', row.names = FALSE)
 
 
 ## end script ##
