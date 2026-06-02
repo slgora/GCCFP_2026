@@ -45,6 +45,7 @@ library(tidyr)
 library(writexl)
 library(purrr)
 library(stringr)
+library(writexl)
 
 # ---- 1. Read in data ----
 
@@ -54,24 +55,25 @@ library(stringr)
 # Genesys: 3,563,673 rows
 # WIEWS: 3,189,177 rows
 # GBIF_living: 33,419 rows
-genebank_accessionlevel_dataset <- read.csv('C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_datasets/genebank_accessionlevel_dataset_2026-05-29.csv')
+genebank_accessionlevel_dataset <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Outputs_script4_2026-06-02/genebank_accessionlevel_dataset_prepped_2026-06-02.csv")
 
 ## Botanic garden accession-level dataset: 558,308 rows
 # Genesys: 51,907 rows
 # WIEWS: 45,948 rows
 # GBIF_living: 69,239 rows
 # Cano: 391,214 rows
-botanicgarden_accessionlevel_dataset <- read.csv('C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_datasets/botanicgarden_accessionlevel_dataset_2026-05-29.csv')
-
+botanicgarden_accessionlevel_dataset <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Outputs_script4_2026-06-02/botanicgarden_accessionlevel_dataset_prepped_2026-06-02.csv")
 
 ### GUIDE FILES ###
 # guide file with wiews org type (CGIAR, etc) assignment for selection data sources
-institute_names_no_syn <- read_excel("C:/Users/sarah/Downloads/FAO_WIEWS_organizations_PG_2026.xlsx")
-institute_names_no_syn <- subset(institute_names_no_syn, select = c(inst_code, wiews_org_type))  %>% drop_na()
-CGIAR_instcodes <- institute_names_no_syn %>% filter(wiews_org_type == "CGIAR")
+institute_names_no_syn <- read_excel("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Input_files_script5_2026-06-02/FAO_WIEWS_organizations_PG_2026.xlsx")
+institute_names_no_syn <- institute_names_no_syn %>%
+  subset(select = c(inst_code, wiews_org_type)) %>%
+  drop_na() %>%
+  rename(wiews_org_category = wiews_org_type)
+CGIAR_instcodes <- institute_names_no_syn %>% filter(wiews_org_category == "CGIAR")
 # guide file of EURISCO instcodes assignment for selection data sources review
-eurisco_path <- "C:/Users/sarah/Downloads/eurisco_inst_code_list.xlsx"
-
+eurisco_path <- "C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Input_files_script5_2026-06-02/eurisco_inst_code_list.xlsx"
 
 
 
@@ -83,8 +85,10 @@ eurisco_path <- "C:/Users/sarah/Downloads/eurisco_inst_code_list.xlsx"
 #           - Remove duplicates in Genesys/WIEWS data by selecting to keep data source with greatest number of records
 #           - Create selection data sources table for Genesys, WIEWS, GBIF-living, Cano
 #           - For each inst_code keep only source with most records
-#           - Proritizes keeping Genesys for CGIAR institions
+#           - Prioritizes keeping Genesys for CGIAR institutions
+#           - Priority order: Genesys, WIEWS, GBIF-living, Cano (Cano is last priority because it has no coords data)
 
+# load function
 source("Functions/select_data_source.R")
 
 genebank_selection <- select_data_source(
@@ -93,44 +97,53 @@ genebank_selection <- select_data_source(
   eurisco_path = eurisco_path,
   preferred_order = c("Genesys", "WIEWS", "GBIF_living"))
 #save selection data sources table
-write.csv(genebank_selection, "C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Guide_files/selection_data_sources_genebankaccessionlevel_2026-05-29.csv", row.names = FALSE)
+write_xlsx(genebank_selection,"C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Outputs_script5_2026-06-02/selection_data_sources_genebankaccessionlevel_2026-06-02.xlsx")
+
 
 botanic_selection <- select_data_source(
   acc_dataset = botanicgarden_accessionlevel_dataset,
   institute_names_no_syn = institute_names_no_syn,
   eurisco_path = eurisco_path,
-  preferred_order = c("Genesys", "WIEWS", "Cano", "GBIF_living"))
+  preferred_order = c("Genesys", "WIEWS", "GBIF_living", "Cano"))
 #save selection data sources table
-write.csv(botanic_selection, "C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Guide_files/selection_data_sources_botanicaccessionlevel_2026-05-29.csv", row.names = FALSE)
+write_xlsx(botanic_selection,"C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Outputs_script5_2026-06-02/selection_data_sources_botanicgardenaccessionlevel_2026-06-02.xlsx")
 
 
 # Use selection_data_sources to filter datasets
 # Filter genebank data set to kept records
 genebank_accessionlevel_dataset <- genebank_accessionlevel_dataset %>%
-  inner_join(
-    genebank_selection %>% select(inst_code, data_source = best_data_source),
-    by = c("inst_code", "data_source"))
+  dplyr::inner_join(
+    genebank_selection %>%
+      dplyr::transmute(
+        wcfp_name_match = species,
+        inst_code,
+        data_source = best_data_source),
+    by = c("wcfp_name_match", "inst_code", "data_source"))
 
 # Filter botanic garden data set to kept records
 botanicgarden_accessionlevel_dataset <- botanicgarden_accessionlevel_dataset %>%
-  inner_join(
-    botanic_selection %>% select(inst_code, data_source = best_data_source),
-    by = c("inst_code", "data_source"))
+  dplyr::inner_join(
+    botanic_selection %>%
+      dplyr::transmute(
+        wcfp_name_match = species,
+        inst_code,
+        data_source = best_data_source),
+    by = c("wcfp_name_match", "inst_code", "data_source"))
 
 # Example: Check counts by kept data source
 table(genebank_accessionlevel_dataset$data_source)
 table(botanicgarden_accessionlevel_dataset$data_source)
 
-# genebank_accessionlevel_dataset: 4,682,342
-# Genesys: 3,429,512 
-# WIEWS: 1,231,369
-# GBIF_living: 21,461
+# genebank_accessionlevel_dataset: 4,736,740 rows
+# Genesys: 3,478,606 rows
+# WIEWS: 1,232,493 rows
+# GBIF_living: 25,641 rows
 
-# botanicgarden_accessionlevel_dataset: 484,565
-# Genesys: 48,192
-# WIEWS: 2,376
-# Cano: 374,409
-# GBIF_living: 59,588
+# botanicgarden_accessionlevel_dataset: 507,923 rows
+# Genesys: 49,646 rows
+# WIEWS: 4,331 rows
+# Cano: 386,119 rows
+# GBIF_living: 67,827 rows
 
 
 
@@ -179,17 +192,20 @@ botanicgarden_accessionlevel_dataset <- botanicgarden_accessionlevel_dataset %>%
   ungroup() %>%
   select(-has_latlong, -is_genesys, -pick_row)
 
+# View record counts by data source
+table(genebank_accessionlevel_dataset$data_source)
+table(botanicgarden_accessionlevel_dataset$data_source)
 
-# genebank_accessionlevel_dataset: 4,675,571
-# Genesys: 3,429,512
-# WIEWS: 1,224,598
-# GBIF_living: 21,461
+# genebank_accessionlevel_dataset: 4,728,281 rows
+# Genesys: 3,478,260 rows
+# WIEWS: 1,224,380 rows
+# GBIF_living: 25,641 rows
 
-# botanicgarden_accessionlevel_dataset: 484,565
-# Genesys: 48,192
-# WIEWS: 2,376
-# Cano: 374,409
-# GBIF_living: 59,588
+# botanicgarden_accessionlevel_dataset: 507,923 rows
+# Genesys: 49,646 rows
+# WIEWS: 4,331 rows
+# Cano: 386,119 rows
+# GBIF_living: 67,827 rows
 
 
 
@@ -247,7 +263,7 @@ genebank_accessionlevel_dataset <- genebank_accessionlevel_dataset %>%
     } else {
       row_number() == 1
     }
-    ) %>%
+  ) %>%
   filter(
     is.na(ID) | ID == "" | pick_row ) %>%
   ungroup() %>%
@@ -272,26 +288,30 @@ botanicgarden_accessionlevel_dataset <- botanicgarden_accessionlevel_dataset %>%
   ungroup() %>%
   select(-has_latlong, -is_genesys, -pick_row, -ID)
 
-# FINAL genebank_acccessionlevel_dataset: 4,672,150
-# Genesys: 3,426,138
-# WIEWS: 1,224,551
-# GBIF_living: 21,461
+# View record counts by data source
+table(genebank_accessionlevel_dataset$data_source)
+table(botanicgarden_accessionlevel_dataset$data_source)
 
-# FINAL botanicgarden_accessionlevel_dataset: 484,565
-# Genesys: 48,192
-# WIEWS: 2,376
-# Cano: 374,409
-# GBIF_living: 59,588
+# FINAL genebank_acccessionlevel_dataset: 4,724,258 rows
+# Genesys: 3,474,878 rows
+# WIEWS: 1,223,739 rows
+# GBIF_living: 25,641 rows
+
+# FINAL botanicgarden_accessionlevel_dataset: 507,857 rows
+# Genesys: 49,646 rows
+# WIEWS: 4,265 rows
+# Cano: 386,119 rows
+# GBIF_living: 67,827 rows
 
 
 #save
 write.csv(genebank_accessionlevel_dataset, 
-          file = "C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/FINAL_DATA_2026_06_01/genebank_accessionlevel_dataset_dedup_2026-06-01.csv",
+          file = "C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Outputs_script5_2026-06-02/genebank_accessionlevel_dataset_FINAL_2026-06-02.csv",
           row.names = FALSE)
 
 #save
 write.csv(botanicgarden_accessionlevel_dataset, 
-          file = "C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/FINAL_DATA_2026_06_01/botanicgarden_accessionlevel_dataset_dedup_2026-06-01.csv",
+          file = "C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Outputs_script5_2026-06-02/botanicgarden_accessionlevel_dataset_FINAL_2026-06-02.csv",
           row.names = FALSE)
 
 
@@ -304,14 +324,14 @@ write.csv(botanicgarden_accessionlevel_dataset,
 # DATASET 4. Occurrences
 #------------------------#
 
-# FINAL genebank_accessionlevel_dataset : 4,672,150
-# with coords: 1,237,771
+# FINAL genebank_accessionlevel_dataset : 4,724,258 rows
+# with coords: 1,247,355 rows
 genebank_accessionlevel_dataset_with_coords <- genebank_accessionlevel_dataset %>% # 
   filter( !(is.na(latitude) | is.na(longitude) | 
               !between(latitude, -90, 90) | !between(longitude, -180, 180)))
 
-# FINAL botanicgarden_accessionlevel_dataset: 484,565
-# with coords: 16,244
+# FINAL botanicgarden_accessionlevel_dataset: 507,857 rows
+# with coords: 19,307 rows
 botanicgarden_accessionlevel_dataset_with_coords <- botanicgarden_accessionlevel_dataset %>% # 
   filter( !(is.na(latitude) | is.na(longitude) | 
               !between(latitude, -90, 90) | !between(longitude, -180, 180)))
@@ -320,10 +340,9 @@ botanicgarden_accessionlevel_dataset_with_coords <- botanicgarden_accessionlevel
 
 
 # RAW GBIF OBSERVATIONS: 6,701,782 rows
-# read in above
-gbif_observations_df_with_coords <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/GBIF_data_observations_2026-05-28.csv")
+gbif_observations_df_raw <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Input_files_script5_2026-06-02/GBIF_observations_data_raw_2026-05-28.csv")
 # with coords: 4,191,231 
-gbif_observations_df_with_coords <- gbif_observations_df %>% # 
+gbif_observations_df_with_coords <- gbif_observations_df_raw %>% # 
   filter( !(is.na(latitude) | is.na(longitude) | 
               !between(latitude, -90, 90) | !between(longitude, -180, 180)))
 
@@ -385,21 +404,21 @@ occurrences_dataset <- rbind(genebank_accessionlevel_dataset_with_coords,
                              botanicgarden_accessionlevel_dataset_with_coords, 
                              gbif_observations_df_with_coords)
 # save
-write.csv(occurrences_dataset, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/FINAL_DATA_2026_06_01/occurrences_dataset_2026-06-01.csv', row.names = FALSE)
+write.csv(occurrences_dataset, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Outputs_script5_2026-06-02/occurrences_dataset_FINAL_2026-06-02.csv', row.names = FALSE)
 
-#### FINAL: Occurrences dataset: 5,445,246 rows
-## Genesys: 1,026,925
-#Genesys (genebanks): 1,023,097
-#Genesys (botanic gardens): 3,828
+#### FINAL: Occurrences dataset: 5,457,893 rows
+## Genesys: 1,041,462 rows
+#Genesys (genebanks): 1,037,196 rows
+#Genesys (botanic gardens): 4,266
 
-## WIEWs: 206,359
-#WIEWS (genbanks): 205,993
-#WIEWS (botanic gardens): 366
+## WIEWs: 201,916 rows
+#WIEWS (genbanks): 200,801 rows
+#WIEWS (botanic gardens): 1,115 rows
 
-## GBIF-living: 20,731
-#GBIF-living (genebanks): 8,681
-#GBIF-living (botanic gardens): 12,050
+## GBIF-living: 23,284 rows
+#GBIF-living (genebanks): 9,358 rows
+#GBIF-living (botanic gardens): 13,926 rows
 
-# GBIF_observations: 4,191,231
+# GBIF_observations: 4,191,231 rows
 
 # end script #
