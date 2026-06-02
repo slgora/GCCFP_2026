@@ -3,7 +3,7 @@
 #
 #     Workflow assigns organization type to data, filters for 
 #     genebanks/botanic gardens, harmonizes data sources to compile into respective datasets.
-#     Data is pre-filtered for WCFP species.                                      
+#     Data is prepped, instcodes corrected, and pre-filtered for WCFP species.                                   
 #
 #     Create 3 data sets:
 #      1. Genebank accession-level dataset
@@ -19,8 +19,7 @@
 #         - BGCI PlantSearch data
 # 
 #     WORKFLOW STEPS:
-#     Step 1. Clean data sources (if needed)
-#             Correct instcodes in all raw data sources
+#     Step 1. Prep data
 #     Step 2. Assign org type, filter to remove non-assigned org
 #     Step 3. Combine into datasets.
 #             accession-level datasets are deduplicated in following, script 5.
@@ -47,63 +46,31 @@ library(stringr)
 
 ### RAW DATASETS ###
 # Genesys data: 3,618,693 rows
-genesys_df <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/GENESYS_data_prepped_2026-03-05.csv")
+genesys_df <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Input_files_script4_2026-06-02/GENESYS_data_prepped_2026-06-02.csv")
 # WIEWS data: 3,236,562 rows
-wiews_df <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/WIEWS_data_prepped_2026-03-05.csv")
+wiews_df <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Input_files_script4_2026-06-02/WIEWS_data_prepped_2026-06-02.csv")
 # BGCI data: 626,307 rows
-bgci_df <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/BGCI_data_prepped_2026-03-09.csv")
+bgci_df <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Input_files_script4_2026-06-02/BGCI_data_prepped_2026-06-02.csv")
 # Cano data: 391,214 rows
-cano_df <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/Cano_data_prepped_2026-03-09.csv")
+cano_df <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Input_files_script4_2026-06-02/Cano_data_prepped_2026-06-02.csv")
 # GBIF living data: 118,198 rows
-gbif_living_df <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/GBIF_data_living_2026-05-28.csv")
+gbif_living_df <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Input_files_script4_2026-06-02/GBIF_data_living_2026-06-02.csv")
 
-
-### GUIDE FILES ###
-# guide file to assign instcode to LC field in Cano
-cano_assign_INSTCODE_to_LC <- read_excel("C:/Users/sarah/Downloads/cano_assign_INSTCODE_to_LC.xlsx")
-# guide file to correct invalid/outdated instcodes
-instcode_corrections <- read_excel("C:/Users/sarah/Downloads/invalid_instcodes.xlsx")
-# guide file to correct gbif inst_codes
-gbif_assign_INSTCODE_to_ID <- read_excel("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Guide_files/gbif_corrected_map.xlsx")
+### GUIDE FILE ###
 # guide file of all organizations in FAO WIEWS and BGCI GardenSearch institution directories
-org_guide <- read_excel("C:/Users/sarah/Downloads/all_organizations_dataset_final_2026-05-29.xlsx")
-
+org_guide <- read_csv("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Input_files_script4_2026-06-02/all_organizations_dataset.csv")
 
 
 # -----------------------------------------------------------------#
-#------------ STEP 1. Clean and harmonize data --------------------
+#----------------------- STEP 1. Prep data ------------------------
 # -----------------------------------------------------------------#
 
-# ----- Correct instcodes for Cano and GBIF-living ----
-# Assign inst_code to LC field for Cano
-cano_assign_INSTCODE_to_LC <- cano_assign_INSTCODE_to_LC %>%
-  select(-data_source,
-         -organization_type)
-cano_df <- cano_df %>% right_join(cano_assign_INSTCODE_to_LC, by = "LC")
-# Assign inst_code by inst_ID_GBIF field for GBIF
-gbif_living_df <- gbif_living_df %>%
-  left_join(gbif_assign_INSTCODE_to_ID, by = "inst_ID_GBIF")
+# Prep organization guide file
+org_guide <- org_guide %>%
+  mutate(inst_code = trimws(inst_code),
+         organization_type = trimws(organization_type))
 
-
-# ----- RENAME fields before type coercion ------
-genesys_df <- genesys_df %>%
-  rename(
-    latitude = LATITUDE,
-    longitude = LONGITUDE,
-    inst_code = INSTCODE)
-wiews_df <- wiews_df %>%
-  rename(
-    latitude = LATITUDE,
-    longitude = LONGITUDE,
-    inst_code = INSTCODE)
-bgci_df <- bgci_df %>%
-  rename(
-    inst_code = ex_situ_garden_id)
-gbif_living_df <- gbif_living_df %>%
-  rename(
-    inst_code = inst_code_WIEWS2)
-
-# -- Type coercion as character for inst_code --
+# -- Harmonize data: Type coercion as character for inst_code --
 genesys_df$inst_code      <- as.character(genesys_df$inst_code)
 wiews_df$inst_code        <- as.character(wiews_df$inst_code)
 bgci_df$inst_code         <- as.character(bgci_df$inst_code)
@@ -111,31 +78,9 @@ cano_df$inst_code         <- as.character(cano_df$inst_code)
 gbif_living_df$inst_code  <- as.character(gbif_living_df$inst_code)
 
 
-# ---- Correct invalid inst_codes (no longer valid in FAO WIEWS) ----
-instcode_corrections$invalid_inst_code <- trimws(instcode_corrections$invalid_inst_code)
-instcode_corrections$valid_inst_code   <- trimws(instcode_corrections$valid_inst_code)
-fix_inst_code <- function(df) {
-  df$inst_code <- trimws(df$inst_code)
-  df <- df %>%
-    left_join(instcode_corrections, by = c("inst_code" = "invalid_inst_code")) %>%
-    mutate(inst_code = if_else(!is.na(valid_inst_code), valid_inst_code, inst_code)) %>%
-    select(-valid_inst_code)
-  df
-}
-genesys_df <- fix_inst_code(genesys_df)
-wiews_df   <- fix_inst_code(wiews_df)
-cano_df    <- fix_inst_code(cano_df)
-gbif_living_df <- fix_inst_code(gbif_living_df)
-
-
 # ----------------------------------------------------------------------------#
 #------------ STEP 2. Organization assignment and filtering ------------------
 # ---------------------------------------------------------------------------#
-
-# Prep organization guide file
-org_guide <- org_guide %>%
-  mutate(inst_code = trimws(inst_code),
-         organization_type = trimws(organization_type))
 
 # Define function to assign org type and filter 
 assign_org_type_and_filter <- function(df, guide_df,
