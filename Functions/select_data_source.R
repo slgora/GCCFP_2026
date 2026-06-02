@@ -36,8 +36,8 @@ select_data_source <- function(
   
   # Count records per wcfp_name_match, inst_code, and data_source
   count_table <- acc_dataset %>%
-    dplyr::count(wcfp_name_match, inst_code, data_source, name = "records") %>%               # wcfp_name_match = normalized genus-species      Here the function counts distinct genus-species + institution grouping by data source
-    dplyr::ungroup()
+    dplyr::count(wcfp_name_match, inst_code, data_source, name = "records") %>%               # wcfp_name_match = normalized genus-species
+    dplyr::ungroup()                                                                          # Here the function counts distinct genus-species + institution combination, by data source
   
   # Create wide count table and force one row per wcfp_name_match + inst_code
   count_table_wide <- count_table %>%
