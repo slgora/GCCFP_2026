@@ -1,3 +1,6 @@
+## Workflow calculates metrics and saves to summary tables as output excel files
+
+
 # ---- Load all packages ----
 library(dplyr)
 library(tidyr)
@@ -9,27 +12,34 @@ library(openxlsx)
 today_str <- format(Sys.Date(), "%Y-%m-%d")
 metrics_output_file <- paste0(
   "C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_metrics/Main/metrics_summary_",
-  today_str, ".xlsx")
+  today_str, ".xlsx"
+)
 institutions_output_file <- paste0(
   "C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_metrics/Main/institution_summary_of_record_count_",
-  today_str, ".xlsx")
+  today_str, ".xlsx"
+)
 
 # ---- 2. Read in datasets ----
 WCFP_plantlist <- read_excel("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/WCFP_plantlist/Standardized/WCFP_plantlist_standardized_2026-02-23.xlsx")
 WCFP_plantlist_names <- WCFP_plantlist %>% select(taxon_name_accepted)
 wcfp_total_species <- nrow(WCFP_plantlist_names)
 
-genebank_accessionlevel_dataset <- read.csv('C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_datasets/genebank_accessionlevel_dataset_2026-05-28.csv', stringsAsFactors=FALSE) %>%
+# FINAL genebank_acccessionlevel_dataset: 4,672,150
+genebank_accessionlevel_dataset <- read.csv('C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/FINAL_DATA_2026_06_01/genebank_accessionlevel_dataset_dedup_2026-06-01.csv', stringsAsFactors=FALSE) %>%
   select(wcfp_name_match, inst_code, data_source)
 
-botanicgarden_accessionlevel_dataset <- read.csv('C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_datasets/botanicgarden_accessionlevel_dataset_2026-05-28.csv', stringsAsFactors=FALSE) %>%
+# FINAL botanicgarden_accessionlevel_dataset: 484,565
+botanicgarden_accessionlevel_dataset <- read.csv('C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/FINAL_DATA_2026_06_01/botanicgarden_accessionlevel_dataset_dedup_2026-06-01.csv', stringsAsFactors=FALSE) %>%
   select(wcfp_name_match, inst_code, data_source)
 
-botanicgarden_specieslevel_dataset <- read.csv('C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_datasets/botanicgarden_specieslevel_dataset_2026-05-28.csv', stringsAsFactors=FALSE) %>%
+## FINAL: Botanic garden species/inst level dataset: 618,544 rows
+botanicgarden_specieslevel_dataset <- read.csv('C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/FINAL_DATA_2026_06_01/botanicgarden_specieslevel_dataset_2026-06-01.csv', stringsAsFactors=FALSE) %>%
   select(wcfp_name_match, inst_code, data_source)
 
-occurrences_dataset <- read.csv('C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Final_datasets/occurrences_dataset_2026-05-28.csv', stringsAsFactors=FALSE) %>%
+# FINAL occurrences dataset: 5,445,246 rows
+occurrences_dataset <- read.csv('C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/FINAL_DATA_2026_06_01/occurrences_dataset_2026-06-01.csv', stringsAsFactors=FALSE) %>%
   select(wcfp_name_match, inst_code, data_source)
+
 
 # ---- 3. Coerce inst_code fields for all datasets ----
 genebank_accessionlevel_dataset$inst_code <- as.character(genebank_accessionlevel_dataset$inst_code)
@@ -207,8 +217,8 @@ for (datnm in c(
   summarystats_raw[[datnm]] <- vals
 }
 # ---- Hard code NEITHER unique-to-data metrics as requested ----
-summarystats_raw[summarystats_raw$metric == "Number of distinct WCFP species unique to data", "NEITHER_genebanks_or_botanic_gardens"] <- "6,469"
-summarystats_raw[summarystats_raw$metric == "Percent of total distinct WCFP species unique to data", "NEITHER_genebanks_or_botanic_gardens"] <- "24.3%"
+summarystats_raw[summarystats_raw$metric == "Number of distinct WCFP species unique to data", "NEITHER_genebanks_or_botanic_gardens"] <- "6,358"
+summarystats_raw[summarystats_raw$metric == "Percent of total distinct WCFP species unique to data", "NEITHER_genebanks_or_botanic_gardens"] <- "23.9%"
 
 # ---- records counts by species, accessions, etc. ----
 combined <- bind_rows(
@@ -280,18 +290,26 @@ wcfp_species_not_in_either <- WCFP_plantlist_names %>%
   rename(WCFP_species = taxon_name_accepted)
 
 # ---- 7. Institution summary of record count Excel ----
-institution_locations <- read_excel("C:/Users/sarah/Downloads/all_organizations_locations_corrected_2026-03-09 (1).xlsx") %>%
+#institution_locations <- read_excel("C:/Users/sarah/Downloads/all_organizations_locations_corrected_2026-03-09 (1).xlsx") %>%
+#  rename(
+#    institution_directory = data_source,
+#    institution_name = organization_name,
+#    institution_type = organization_type) %>%
+#  select(
+#    institution_directory,
+#    inst_code,
+#    institution_name,
+#    institution_type)
+
+institution_locations <- read_excel("C:/Users/sarah/Downloads/all_organizations_dataset_final_2026-05-29.xlsx") %>%
   rename(
-    institution_directory = data_source,
     institution_name = organization_name,
-    institution_type = organization_type
-  ) %>%
+    institution_type = organization_type) %>%
   select(
     institution_directory,
     inst_code,
     institution_name,
-    institution_type
-  )
+    institution_type)
 bgci_counts <- bgci %>%
   group_by(inst_code) %>%
   summarise(record_count_BGCI = n(), .groups = "drop")
@@ -377,4 +395,5 @@ write_smart_xlsx(
 )
 cat("Output written to", institutions_output_file, "\n")
 
-### end script ###
+
+## end script ##
