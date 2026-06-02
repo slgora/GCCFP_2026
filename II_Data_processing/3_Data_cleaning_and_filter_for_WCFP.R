@@ -37,6 +37,7 @@ WCFP_plantlist_stand <- read_excel("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/
 #--- 2026 Data Read-In: Standardized, unfiltered for WCFP -----#
 #--------------------------------------------------------------#
 
+# ----- Raw data ---
 # Genesys Data (all genesys): standardized, unfiltered
 WCFP_Genesys_data_all <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Standardized/WCFP_Genesys_data_all_standardized_2026-03-03.csv")
 
@@ -53,8 +54,13 @@ WCFP_GBIF_data_all <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCF
 # WIEWS data (wcfp original sp + new sp): standardized, unfiltered: 3,236,589 rows
 WCFP_WIEWS_data_all <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Standardized/WCFP_WIEWS_data_all_standardized_2026-02-26.csv")
 
-
-
+# ----- Guide Files ---
+# Guide file to assign instcode to LC field in Cano
+cano_assign_INSTCODE_to_LC <- read_excel("C:/Users/sarah/Downloads/cano_assign_INSTCODE_to_LC.xlsx")
+# Guide file to correct invalid/outdated instcodes
+instcode_corrections <- read_excel("C:/Users/sarah/Downloads/invalid_instcodes.xlsx")
+# Guide file to correct gbif inst_codes
+gbif_assign_INSTCODE_to_ID <- read_excel("C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Guide_files/gbif_corrected_map.xlsx")
 
 
 ################################################################################
@@ -364,6 +370,91 @@ WIEWS_dropped_rows <- anti_join(WCFP_WIEWS_data_all2 , WCFP_WIEWS_filtered,,
 write.csv(WCFP_WIEWS_filtered, 'C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Processed_data/Standardized_and_filtered/WCFP_WIEWS_data_filtered_2026-03-05.csv', row.names = FALSE)
 
 
+
+# ------------------------------------------------#
+#------------ Clean instcodes --------------------
+# -------------------------------------------------#
+
+### RAW DATASETS ###
+# Genesys data: 3,618,693 rows
+genesys_df <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/GENESYS_data_prepped_2026-03-05.csv")
+# WIEWS data: 3,236,562 rows
+wiews_df <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/WIEWS_data_prepped_2026-03-05.csv")
+# BGCI data: 626,307 rows
+bgci_df <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/BGCI_data_prepped_2026-03-09.csv")
+# Cano data: 391,214 rows
+cano_df <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/Cano_data_prepped_2026-03-09.csv")
+# GBIF living data: 118,198 rows
+gbif_living_df <- read_csv("C:/Users/sarah/OneDrive/Desktop/GCCFP_final/GCCFP_final/Data/Data_processing/NEW/GBIF_data_living_2026-05-28.csv")
+
+# guide file of all organizations in FAO WIEWS and BGCI GardenSearch institution directories
+org_guide <- read_excel("C:/Users/sarah/Downloads/all_organizations_dataset_final_2026-05-29.xlsx")
+
+# ----- Correct instcodes for Cano and GBIF-living ----
+# Assign inst_code to LC field for Cano
+cano_assign_INSTCODE_to_LC <- cano_assign_INSTCODE_to_LC %>%
+  select(-data_source,
+         -organization_type)
+cano_df <- cano_df %>% right_join(cano_assign_INSTCODE_to_LC, by = "LC")
+# Assign inst_code by inst_ID_GBIF field for GBIF
+gbif_living_df <- gbif_living_df %>%
+  left_join(gbif_assign_INSTCODE_to_ID, by = "inst_ID_GBIF")
+
+# ----- RENAME fields before type coercion ------
+genesys_df <- genesys_df %>%
+  rename(
+    latitude = LATITUDE,
+    longitude = LONGITUDE,
+    inst_code = INSTCODE)
+wiews_df <- wiews_df %>%
+  rename(
+    latitude = LATITUDE,
+    longitude = LONGITUDE,
+    inst_code = INSTCODE)
+bgci_df <- bgci_df %>%
+  rename(
+    inst_code = ex_situ_garden_id)
+gbif_living_df <- gbif_living_df %>%
+  rename(
+    inst_code = inst_code_WIEWS2)
+
+# -- Type coercion as character for inst_code --
+genesys_df$inst_code      <- as.character(genesys_df$inst_code)
+wiews_df$inst_code        <- as.character(wiews_df$inst_code)
+bgci_df$inst_code         <- as.character(bgci_df$inst_code)
+cano_df$inst_code         <- as.character(cano_df$inst_code)
+gbif_living_df$inst_code  <- as.character(gbif_living_df$inst_code)
+
+# ---- Correct invalid inst_codes (no longer valid in FAO WIEWS) ----
+instcode_corrections$invalid_inst_code <- trimws(instcode_corrections$invalid_inst_code)
+instcode_corrections$valid_inst_code   <- trimws(instcode_corrections$valid_inst_code)
+fix_inst_code <- function(df) {
+  df$inst_code <- trimws(df$inst_code)
+  df <- df %>%
+    left_join(instcode_corrections, by = c("inst_code" = "invalid_inst_code")) %>%
+    mutate(inst_code = if_else(!is.na(valid_inst_code), valid_inst_code, inst_code)) %>%
+    select(-valid_inst_code)
+  df
+}
+genesys_df <- fix_inst_code(genesys_df)
+wiews_df   <- fix_inst_code(wiews_df)
+cano_df    <- fix_inst_code(cano_df)
+gbif_living_df <- fix_inst_code(gbif_living_df)
+
+
+#---- Clean organization guide file -----
+org_guide <- org_guide %>%
+  mutate(inst_code = trimws(inst_code),
+         organization_type = trimws(organization_type))
+
+
+# SAVE prepped data with instcodes corrected and cleaned guide file
+write.csv(genesys_df, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Input_files_script4_2026-06-02/GENESYS_data_prepped_2026-06-02.csv', row.names = FALSE)
+write.csv(wiews_df, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Input_files_script4_2026-06-02/WIEWS_data_prepped_2026-06-02.csv', row.names = FALSE)
+write.csv(bgci_df, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Input_files_script4_2026-06-02/BGCI_data_prepped_2026-06-02.csv', row.names = FALSE)
+write.csv(cano_df, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Input_files_script4_2026-06-02/Cano_data_prepped_2026-06-02.csv', row.names = FALSE)
+write.csv(gbif_living_df, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Input_files_script4_2026-06-02/GBIF_data_living_2026-06-02.csv', row.names = FALSE)
+write.csv(org_guide, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed_data/Data_request_PG/Input_files_script4_2026-06-02/all_organizations_dataset.csv', row.names = FALSE)
 
 
 ### End script ####
