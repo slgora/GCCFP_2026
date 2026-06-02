@@ -3,6 +3,7 @@
 #'
 #' @param acc_dataset Data frame with accession records. Must contain columns:
 #'   wcfp_name_match, inst_code, data_source
+#'    NOTE: wcfp_name_match is normalized genus+species field
 #' @param institute_names_no_syn Data frame with columns: inst_code, wiews_org_category
 #' @param eurisco_path File path to EURISCO Excel sheet (must have "inst_code")
 #' @param preferred_order Character vector listing preferred sources in order,
@@ -18,7 +19,7 @@ select_data_source <- function(
     acc_dataset,
     institute_names_no_syn,
     eurisco_path,
-    preferred_order = c("Genesys", "WIEWS", "GBIF_living", "Cano")
+    preferred_order = c("Genesys", "WIEWS", "GBIF_living", "Cano")      # Selection order, first Genesys, WIEWS, GBIF-living and Cano as last selection bc Cano has no coords
 ) {
   stopifnot(all(c("wcfp_name_match", "inst_code", "data_source") %in% colnames(acc_dataset)))
   stopifnot(all(c("inst_code", "wiews_org_category") %in% colnames(institute_names_no_syn)))
@@ -35,9 +36,9 @@ select_data_source <- function(
     dplyr::distinct(inst_code, .keep_all = TRUE)
   
   # Count records per wcfp_name_match, inst_code, and data_source
-  count_table <- acc_dataset %>%
-    dplyr::count(wcfp_name_match, inst_code, data_source, name = "records") %>%               # wcfp_name_match = normalized genus-species
-    dplyr::ungroup()                                                                          # Here the function counts distinct genus-species + institution combination, by data source
+  count_table <- acc_dataset %>%                                                        # Here the function counts distinct genus-species + institution combination, by data source
+    dplyr::count(wcfp_name_match, inst_code, data_source, name = "records") %>%         # wcfp_name_match = normalized genus-species
+    dplyr::ungroup()                                                                
   
   # Create wide count table and force one row per wcfp_name_match + inst_code
   count_table_wide <- count_table %>%
