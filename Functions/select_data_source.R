@@ -24,14 +24,14 @@ select_data_source <- function(
   stopifnot(all(c("wcfp_name_match", "inst_code", "data_source") %in% colnames(acc_dataset)))
   stopifnot(all(c("inst_code", "wiews_org_category") %in% colnames(institute_names_no_syn)))
   
-  eurisco_list <- tryCatch(
+  eurisco_list <- tryCatch(                                         # EURISCO status of institution included for review ONLY, function does not use EURISCO status as selection logic
     readxl::read_excel(eurisco_path),
     error = function(e) stop("Could not read EURISCO file: ", e$message)
   )
   stopifnot("inst_code" %in% colnames(eurisco_list))
   eurisco_codes <- unique(eurisco_list$inst_code)
   
-  institute_names_no_syn_one <- institute_names_no_syn %>%
+  institute_names_no_syn_one <- institute_names_no_syn %>%      #annotates wiews_org_category to inst_code, used for selection of Genesys for CGIAR categorized institutions
     dplyr::select(inst_code, wiews_org_category) %>%
     dplyr::distinct(inst_code, .keep_all = TRUE)
   
@@ -84,10 +84,10 @@ select_data_source <- function(
     dplyr::transmute(wcfp_name_match, inst_code, force_genesys = TRUE)
   
   # Apply CGIAR override
-  best_sources <- best_sources %>%
+  best_sources <- best_sources %>%                             
     dplyr::left_join(genesys_cgiar, by = c("wcfp_name_match", "inst_code")) %>%
     dplyr::mutate(
-      best_data_source = ifelse(!is.na(force_genesys) & force_genesys, "Genesys", data_source)
+      best_data_source = ifelse(!is.na(force_genesys) & force_genesys, "Genesys", data_source)         #CGIAR institutions always selected from Genesys
     ) %>%
     dplyr::select(wcfp_name_match, inst_code, best_data_source)
   
