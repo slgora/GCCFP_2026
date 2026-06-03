@@ -396,10 +396,7 @@ gbif_observations_df_with_coords <- gbif_observations_df_with_coords %>%
     longitude = longitude,
     data_source = data_source )
 
-
-#occurrences without coords filtered: 11,858,497
-
-## FINAL: Occurrences dataset: 5,445,246 rows
+## FINAL: Occurrences dataset: 5,457,893 rows
 occurrences_dataset <- rbind(genebank_accessionlevel_dataset_with_coords, 
                              botanicgarden_accessionlevel_dataset_with_coords, 
                              gbif_observations_df_with_coords)
@@ -409,7 +406,7 @@ write.csv(occurrences_dataset, 'C:/Users/sarah/My Drive/GCCFP_2026_NEW_processed
 #### FINAL: Occurrences dataset: 5,457,893 rows
 ## Genesys: 1,041,462 rows
 #Genesys (genebanks): 1,037,196 rows
-#Genesys (botanic gardens): 4,266
+#Genesys (botanic gardens): 4,266 rows
 
 ## WIEWs: 201,916 rows
 #WIEWS (genbanks): 200,801 rows
